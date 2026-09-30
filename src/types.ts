@@ -152,8 +152,6 @@ export interface RecallMeta {
   dossiers?: string[];
   /** how far the search reached: the pool the judge saw was the 40 best hits, 2,000 hits, or every turn */
   reach?: 'light' | 'deep' | 'full';
-  /** the folder the conversations were kept to, when the ask asked for that */
-  cwd?: string;
 }
 
 export interface AgentTraceEntry {
@@ -206,8 +204,6 @@ export interface ThoughtData extends Record<string, unknown> {
   /** the reach and the amount this ask's recall ran with (snapshotted like the switch; undefined = the defaults at the time) */
   recallReach?: 'light' | 'deep' | 'full';
   recallScale?: 'lean' | 'standard' | 'generous';
-  /** only conversations run under this canvas's working folder (snapshotted like the reach) */
-  recallCwdOnly?: boolean;
   /** what recall brought in for this node: listed, priced, removable; reused as they stand on a rerun */
   recallItems?: RecallItem[];
   recallMeta?: RecallMeta;

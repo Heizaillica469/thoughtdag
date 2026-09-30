@@ -12,6 +12,7 @@ import { useT, fmt } from '../i18n';
 import { isViewerMode } from '../lib/viewer';
 import { loadAttachmentContent } from '../lib/attachment-vault';
 import { HtmlMaterialView } from './HtmlMaterialView';
+import SearchToggles from './ui/SearchToggles';
 
 // MaterialReader: the reading overlay — a VIEW onto a material node, never a
 // container. Select a passage (in the original PDF's text layer, or in the
@@ -977,6 +978,9 @@ function ReaderOverlay({ node, onLocate }: { node: ThoughtNode; onLocate: (id: s
             className="flex-1 min-w-[200px] bg-wash text-sm text-ink rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-accent/40 placeholder-ink-faint"
             data-reader-wholeask
           />
+          {/* the reader's one set of per-ask switches: every ask from here
+              (whole material, a selection, a follow-up in the rail) uses them */}
+          <SearchToggles size={15} />
           <button
             onClick={submitWhole}
             disabled={!wholeDraft.trim()}

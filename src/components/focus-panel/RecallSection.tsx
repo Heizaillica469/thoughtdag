@@ -114,9 +114,7 @@ export default function RecallSection({ nodeId, items, meta, recallOn, progress 
                 </div>
               )}
               {meta.budget ? <div className="flex items-center gap-2 flex-wrap">{fmt(t('panel.recallUsed'), { b: meta.budget, u: total })}</div> : null}
-              {meta.reach && <div>{fmt(t('panel.recallReach'), { r: t(meta.reach === 'light' ? 'recall.reachLight' : meta.reach === 'deep' ? 'recall.reachDeep' : 'recall.reachFull') })}</div>}
-              {meta.cwd && <div className="break-all" data-recall-cwd>{fmt(t('panel.recallCwd'), { d: meta.cwd })}</div>}
-              {meta.judge && <div>{fmt(t('panel.recallJudge'), { j: JUDGE_LABELS[meta.judge.provider as JudgeProviderId] ?? meta.judge.provider })} · {t(meta.judge.calibrated ? 'judge.calibrated' : 'judge.uncalibrated')}</div>}
+              {meta.reach && <div>{fmt(t('panel.recallReach'), { r: t(meta.reach === 'light' ? 'recall.reachLight' : meta.reach === 'deep' ? 'recall.reachDeep' : 'recall.reachFull') })}</div>}              {meta.judge && <div>{fmt(t('panel.recallJudge'), { j: JUDGE_LABELS[meta.judge.provider as JudgeProviderId] ?? meta.judge.provider })} · {t(meta.judge.calibrated ? 'judge.calibrated' : 'judge.uncalibrated')}</div>}
               {meta.judgeError && <div className="text-amber-600">{fmt(t('panel.recallJudgeFailed'), { e: meta.judgeError })}</div>}
             </div>
           )}

@@ -129,37 +129,8 @@ export interface RecallOptions {
   /** the reach and the amount the ask was made with (its node's snapshot); the defaults otherwise */
   reach?: RecallReach;
   scale?: RecallScale;
-  /** only conversations run under the canvas's working folder (see recallFolder) */
-  cwdOnly?: boolean;
 }
 export interface RecallOutcome { items: RecallItem[]; meta: RecallMeta }
-
-/** The folder a "this folder only" recall is kept to: the agent folder the
- *  person chose for this canvas, else the folder most of its mirrored turns
- *  came from, else the harness session's. Null when the canvas has none, in
- *  which case the menu greys the option and says why. */
-export async function recallFolder(): Promise<string | null> {
-  try {
-    const { useProjects } = await import('../store/projects');
-    const { projects, activeId } = useProjects.getState();
-    const chosen = projects.find((p) => p.id === activeId)?.agentCwd;
-    if (chosen) return chosen.replace(/[\\/]+$/, '');
-    const counts = new Map<string, number>();
-    for (const n of useStore.getState().nodes) {
-      const c = n.data.importSource?.cwd;
-      if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
-    }
-    let best: string | null = null; let bestN = 0;
-    for (const [c, n] of counts) if (n > bestN) { best = c; bestN = n; }
-    if (best) return best.replace(/[\\/]+$/, '');
-    const { currentDshSession } = await import('./atlas/dsh-bridge');
-    const session = currentDshSession()?.cwd;
-    return session ? session.replace(/[\\/]+$/, '') : null;
-  } catch { return null; }
-}
-/** The last path segment, for a label. */
-export const folderTail = (p: string): string => p.split(/[\\/]/).filter(Boolean).slice(-1)[0] ?? p;
-const underFolder = (cwd: string | undefined, folder: string): boolean => !!cwd && (cwd === folder || cwd.startsWith(folder + '/') || cwd.startsWith(folder + '\\'));
 
 /** How many candidates are read in full: with a judge, enough to rank. */
 export const RECALL_POOL = 16;
@@ -246,9 +217,8 @@ export async function fetchRecallItems(question: string, opts: RecallOptions = {
   const findLimit = Number.isFinite(poolSize) ? poolSize : 100_000;
   meta.budget = budget;
   if (judged) meta.reach = reach;
-  // kept to the canvas's folder when asked: the index filters what it can (find), the rest is filtered here
-  const folder = opts.cwdOnly ? await recallFolder() : null;
-  if (folder) meta.cwd = folder;
+  // every conversation the index knows, whatever folder it ran in: a canvas has no workspace of its
+  // own, and keeping to one is an agent's business (the index's cwd filter serves the CLI and MCP)
   const terms = recallTerms(question);
   // which topics the question is about: the judge decides; without one, a topic named in the question
   const table = await bridge.topics().catch(() => null);
@@ -295,7 +265,6 @@ export async function fetchRecallItems(question: string, opts: RecallOptions = {
   let total = 0;
   const admit = (h: WhyFindHit): { hit: WhyFindHit; matched: string[]; topics: string[]; head?: string } | null => {
     if (opts.excludeSession && h.runner === 'thoughtdag' && h.session === opts.excludeSession) return null;
-    if (folder && !underFolder(h.cwd, folder)) return null;
     const k = keyOf(h);
     if (opts.excludeKeys?.has(k)) return null;
     let cur = found.get(k);
@@ -310,9 +279,8 @@ export async function fetchRecallItems(question: string, opts: RecallOptions = {
   const byTopic = about.length && table?.labeled
     ? bridge.byTopic(about.map((a) => a.id), { limit: Math.floor(findLimit / 2) }).then((r) => ({ about, hits: r.hits })).catch(() => null)
     : Promise.resolve(null);
-  const findOpts = { limit: findLimit, ...(folder ? { cwd: folder } : {}) };
   for (const term of terms) {
-    const r = await bridge.find(term, findOpts).catch(() => null);
+    const r = await bridge.find(term, { limit: findLimit }).catch(() => null);
     if (!r) continue;
     if (r.turns > 0) gather(r, term);
     // no hits, or a rare spelling next to a frequent near word: search what was meant too
@@ -320,7 +288,7 @@ export async function fetchRecallItems(question: string, opts: RecallOptions = {
       const fix = await correctTerm(bridge, term);
       if (!fix) continue;
       meta.corrections.push({ from: term, to: fix.to, ...(fix.p !== undefined ? { p: fix.p } : {}) });
-      const rr = await bridge.find(fix.to, findOpts).catch(() => null);
+      const rr = await bridge.find(fix.to, { limit: findLimit }).catch(() => null);
       if (rr) gather(rr, fix.to);
     }
   }
@@ -444,7 +412,7 @@ export async function recallMore(nodeId: string): Promise<number> {
   if (!node) return 0;
   const have = node.data.recallItems ?? [];
   const { useProjects } = await import('../store/projects');
-  const out = await fetchRecallItems(node.data.question, { excludeSession: useProjects.getState().activeId, excludeKeys: new Set(have.map(keyOf)), reach: node.data.recallReach, scale: node.data.recallScale, cwdOnly: node.data.recallCwdOnly, limit: scale(node.data.recallScale).more, budget: Math.floor(judgedBudget(node.data.model ?? useUiStore.getState().selectedModel ?? undefined) / 2), model: node.data.model ?? useUiStore.getState().selectedModel ?? undefined });
+  const out = await fetchRecallItems(node.data.question, { excludeSession: useProjects.getState().activeId, excludeKeys: new Set(have.map(keyOf)), reach: node.data.recallReach, scale: node.data.recallScale, limit: scale(node.data.recallScale).more, budget: Math.floor(judgedBudget(node.data.model ?? useUiStore.getState().selectedModel ?? undefined) / 2), model: node.data.model ?? useUiStore.getState().selectedModel ?? undefined });
   if (!out.items.length) return 0;
   useStore.setState((s) => ({
     nodes: s.nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, recallItems: [...(n.data.recallItems ?? []), ...out.items], recallMeta: { ...(n.data.recallMeta ?? { corrections: [], pool: 0, total: 0 }), ...out.meta, corrections: [...(n.data.recallMeta?.corrections ?? []), ...out.meta.corrections] } } } : n)),

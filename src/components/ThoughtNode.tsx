@@ -690,6 +690,16 @@ export default function ThoughtNode({ id, data }: NodeProps<ThoughtNodeType>) {
                 rows={2}
                 autoFocus
               />
+              {/* A fresh node is a landing page in a card: the same per-ask
+                  switches (web, scholar, recall) sit under its question, so
+                  the first ask can open a door without leaving the card.
+                  The click must not select the node (that swaps the card
+                  for the panel). */}
+              {isAwaitingAsk && (
+                <div className="flex items-center justify-end gap-1 mt-1.5 nodrag nopan" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} data-ask-toggles>
+                  <SearchToggles size={15} />
+                </div>
+              )}
               {/* Revision confirms explicitly: visible exits instead of an
                   invisible Enter contract. mousedown-preventDefault keeps the
                   textarea's blur from racing the click. */}

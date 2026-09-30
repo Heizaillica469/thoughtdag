@@ -56,12 +56,9 @@ interface UiState {
   /** how far a judged recall reaches: 40 hits read in full, 2,000 hits by their heads, or every turn */
   recallReach: 'light' | 'deep' | 'full';
   setRecallReach: (r: 'light' | 'deep' | 'full') => void;
-  /** only conversations run under the canvas's working folder (the why layer's cwd filter, given a caller; #51) */
-  recallCwdOnly: boolean;
-  setRecallCwdOnly: (v: boolean) => void;
   /** the composer's recall menu: what the next ask uses instead of the defaults; the ask spends it */
-  recallOverride: { enabled?: boolean; reach?: 'light' | 'deep' | 'full'; scale?: 'lean' | 'standard' | 'generous'; cwdOnly?: boolean } | null;
-  setRecallOverride: (o: { enabled?: boolean; reach?: 'light' | 'deep' | 'full'; scale?: 'lean' | 'standard' | 'generous'; cwdOnly?: boolean } | null) => void;
+  recallOverride: { enabled?: boolean; reach?: 'light' | 'deep' | 'full'; scale?: 'lean' | 'standard' | 'generous' } | null;
+  setRecallOverride: (o: { enabled?: boolean; reach?: 'light' | 'deep' | 'full'; scale?: 'lean' | 'standard' | 'generous' } | null) => void;
   /** how many items one recall brings in, and the token budget they share */
   /** the judge (a System One decision endpoint) recall and other judgements may ask */
   judge: import('./judge').JudgeSettings;
@@ -229,8 +226,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   setRecallScale: (s) => { localStorage.setItem('thoughtdag.recallScale', s); set({ recallScale: s }); },
   recallReach: ((): 'light' | 'deep' | 'full' => { const v = localStorage.getItem('thoughtdag.recallReach'); return v === 'deep' || v === 'full' ? v : 'light'; })(),
   setRecallReach: (r) => { localStorage.setItem('thoughtdag.recallReach', r); set({ recallReach: r }); },
-  recallCwdOnly: localStorage.getItem('thoughtdag.recallCwdOnly') === 'on',
-  setRecallCwdOnly: (v) => { localStorage.setItem('thoughtdag.recallCwdOnly', v ? 'on' : 'off'); set({ recallCwdOnly: v }); },
   recallOverride: null,
   setRecallOverride: (o) => set((s) => ({ recallOverride: o === null ? null : { ...(s.recallOverride ?? {}), ...o } })),
   judge: (() => {
@@ -463,9 +458,9 @@ if (import.meta.env.DEV) {
 
 /** The recall settings an ask starts with: the composer menu's one-ask override where set, else the
  *  defaults (the judge page's). The ask spends the override, so the next ask is back on the defaults. */
-export function recallSnapshot(): { recall: boolean; recallReach: 'light' | 'deep' | 'full'; recallScale: 'lean' | 'standard' | 'generous'; recallCwdOnly: boolean } {
+export function recallSnapshot(): { recall: boolean; recallReach: 'light' | 'deep' | 'full'; recallScale: 'lean' | 'standard' | 'generous' } {
   const s = useUiStore.getState();
   const o = s.recallOverride;
   if (o) useUiStore.setState({ recallOverride: null });
-  return { recall: o?.enabled ?? s.recallEnabled, recallReach: o?.reach ?? s.recallReach, recallScale: o?.scale ?? s.recallScale, recallCwdOnly: o?.cwdOnly ?? s.recallCwdOnly };
+  return { recall: o?.enabled ?? s.recallEnabled, recallReach: o?.reach ?? s.recallReach, recallScale: o?.scale ?? s.recallScale };
 }
