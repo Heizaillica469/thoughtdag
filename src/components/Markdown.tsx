@@ -43,6 +43,8 @@ const SANITIZE_SCHEMA: Schema = {
     ...defaultSchema.attributes,
     // remark-math marks its code as language-math plus math-inline / math-display; KaTeX reads all three
     code: [['className', /^language-./, 'math-inline', 'math-display']],
+    // the marks this file injects itself: a user highlight, and an explore trace whose target the hosts read on click
+    mark: [['className', 'highlight-mark', 'explore-mark'], 'dataExploreTarget'],
   },
 };
 const REHYPE_PLUGINS: PluggableList = [rehypeRaw, [rehypeSanitize, SANITIZE_SCHEMA], rehypeHighlight, rehypeKatex];
@@ -155,7 +157,8 @@ export const Markdown = memo(function Markdown({ children, base }: { children: s
   );
 });
 
-const MARK_OPEN = '<mark class="bg-amber-100 text-amber-800 px-0.5 rounded">';
+// one stable class, styled in index.css: the sanitizer's allow-list names it, and a style change never has to
+const MARK_OPEN = '<mark class="highlight-mark">';
 
 // A match spanning list items / paragraphs / table cells cannot live in
 // ONE <mark>: an inline tag wrapped around "\n- item" breaks the block

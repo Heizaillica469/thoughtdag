@@ -558,7 +558,7 @@ async function handleJudge(body) {
 // and hex IPv4 forms into dotted ones before a hostname reaches this.
 function isDisallowedHost(hostname) {
   const h = String(hostname ?? '').toLowerCase();
-  if (!h || h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h === '0.0.0.0') return true;
+  if (!h || h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h.endsWith('.internal') || h === '0.0.0.0') return true;
   const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
   if (v4) {
     const a = Number(v4[1]), b = Number(v4[2]);

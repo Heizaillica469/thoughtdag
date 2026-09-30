@@ -374,6 +374,11 @@ textarea:focus-visible {
     0 0 32px color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 
+/* User highlights: a fill, so they read apart from the explore marks' underline below. */
+.markdown-body mark.highlight-mark {
+  @apply bg-amber-100 text-amber-800 px-0.5 rounded;
+}
+
 /* Explore marks: the passages child branches were born from. A warm dotted
    underline (structural trace), never a fill — fills belong to the user's
    own highlights. Clickable where the host delegates to the child node. */
