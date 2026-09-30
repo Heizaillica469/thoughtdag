@@ -40,6 +40,17 @@ const DOCS = 'https://chenxiachan.github.io/thoughtdag/docs';
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
     // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
+    version: '0.5.9',
+    date: '2026-10-01',
+    announce: false,
+    lead: {
+      zh: '回忆与记忆的四处收口，都出自 #51 的复审：归档的节点退出回忆索引（这次启动会把索引重建一遍）；画像文档的每一行记着来自哪个画布、哪天、是本人说的还是推断的，模型改写后不再丢；新拉出的空节点和阅读器底栏有了和追问框一样的联网、学术、回忆开关；基准的 repair 用例多了一格带陈旧标记的条件。',
+      en: 'Four follow-ups from the #51 review, all on recall and memory: archived nodes leave the recall index (the index rebuilds once on this start); every line of the profile documents keeps which canvas it came from, when, and whether you said it or it was inferred, through the model\'s rewrites; a fresh node and the reader\'s footer carry the same web, scholar and recall switches as a follow-up; the benchmark\'s repair cases gain a condition that carries the stale mark.',
+    },
+    items: [],
+  },
+  {
+    // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
     version: '0.5.8',
     date: '2026-09-30',
     announce: false,
