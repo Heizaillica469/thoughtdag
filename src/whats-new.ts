@@ -40,6 +40,17 @@ const DOCS = 'https://chenxiachan.github.io/thoughtdag/docs';
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
     // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
+    version: '0.5.8',
+    date: '2026-09-30',
+    announce: false,
+    lead: {
+      zh: '修复 0.5.7 的一处遗漏：回答里的消毒把画布自己加的标记也剥掉了，从回答文字跳到分支的入口失效，用户高亮和探索标记都退化成默认黄底。现在两种标记保留各自的类和目标，跳转、点状下划线、高亮填色都回来了。',
+      en: 'Fixes an oversight in 0.5.7: the answer sanitizer also stripped the marks the canvas adds itself, so the jump from an answer to the branch it bore stopped working and highlights and explore marks fell back to the browser\'s plain yellow. Both marks keep their class and target again; the jump, the dotted underline and the highlight fill are back.',
+    },
+    items: [],
+  },
+  {
+    // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
     version: '0.5.7',
     date: '2026-09-30',
     announce: false,
