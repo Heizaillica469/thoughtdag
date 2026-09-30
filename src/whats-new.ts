@@ -40,6 +40,17 @@ const DOCS = 'https://chenxiachan.github.io/thoughtdag/docs';
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
     // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
+    version: '0.5.10',
+    date: '2026-10-01',
+    announce: false,
+    lead: {
+      zh: '修复 0.5.9 带出的一处：索引升级后、第一次搜索之前，「全量」回忆的确认框把索引读成 0 条、0 秒、0 美元。现在计数会先把索引更新到位；索引真的空着或还在重建时，只提示一句，不弹确认框。',
+      en: 'Fixes one thing 0.5.9 brought: after the index upgrade and before the first search, the confirm dialog for a full recall read the index as 0 turns, 0 seconds, $0.00. The count now brings the index up to date first; an index that is empty or still rebuilding gets a notice instead of a dialog.',
+    },
+    items: [],
+  },
+  {
+    // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
     version: '0.5.9',
     date: '2026-10-01',
     announce: false,
