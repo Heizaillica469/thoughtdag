@@ -1107,8 +1107,14 @@ async function findJson(phrase: string, opts: { scope?: 'q' | 'a' | 'm' | 'all';
  *  `total` counts them all; `offset`/`limit` page; `head` is the characters kept of each field. */
 interface TurnHeadJson { kind: 'turn' | 'memory'; session: string; runner: FactSession['runner']; title: string; cwd: string; file: string; turn: number; at: string | null; q: string; a: string; open: string }
 async function turnsJson(opts: { offset?: number; limit?: number; head?: number } = {}): Promise<{ total: number; turns: TurnHeadJson[] }> {
-  // the count alone comes from the text manifest, at once (the line file is a hundred megabytes on a big index)
-  if (opts.limit === 0) { const text = await loadText(); return { total: Object.values(text.sessions).reduce((a, b) => a + b, 0), turns: [] }; }
+  // the count alone comes from the text manifest, at once (the line file is a hundred megabytes on a big
+  // index). A manifest from an earlier index version reads as empty, so an empty one brings the index up
+  // to date first: after a version bump the count would otherwise be 0 until the next search rebuilt it.
+  if (opts.limit === 0) {
+    let text = await loadText();
+    if (!Object.keys(text.sessions).length) { await ensureFresh(); text = await loadText(); }
+    return { total: Object.values(text.sessions).reduce((a, b) => a + b, 0), turns: [] };
+  }
   const facts = await ensureFresh();
   const head = Math.max(40, Math.min(1000, opts.head ?? 300));
   const turnsOf = new Map<string, Map<number, FactTurn>>();

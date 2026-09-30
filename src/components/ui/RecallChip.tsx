@@ -43,6 +43,9 @@ export default function RecallChip() {
   const pickReach = async (r: RecallReach) => {
     if (r === 'full') {
       const total = await Promise.resolve().then(() => whyBridge()?.turns({ limit: 0 })).then((x) => x?.total ?? 0).catch(() => 0);
+      // nothing to hand to the judge (an empty index, or one still being rebuilt): full has no meaning yet, and a
+      // dialog pricing 0 turns at $0.00 would only look broken
+      if (!total) { toast('info', t('recall.reachFullEmpty'), 6000); return; }
       const est = reachEstimate(total);
       const ok = await confirmDialog({ title: t('recall.reachFullTitle'), message: fmt(t('recall.reachFullMsg'), { n: total.toLocaleString(), s: String(Math.round(est.seconds)), c: est.dollars.toFixed(2) }), confirmLabel: t('recall.reachFullOk') });
       if (!ok) return;

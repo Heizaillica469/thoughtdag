@@ -790,6 +790,7 @@ export const en = {
   'recall.reachFullTitle': 'Switch to full recall',
   'recall.reachFullMsg': 'Full hands every one of the {n} turns in the index to the decision model: about {s} seconds and ${c} per question, more as the index grows. In testing, deep answered as many questions as full. Switch to full?',
   'recall.reachFullOk': 'Switch to full',
+  'recall.reachFullEmpty': 'The index has no conversations to hand to the decision model yet, or it is being rebuilt. Ask once on light or deep; choose full once the index is built.',
   'panel.recallReach': 'search reach: {r}',
   'panel.recallJudging': 'The decision model is reading candidates: {done}/{total}',
   'panel.recallOffHint': 'Recall is off. This node keeps {n} recalled items; with recall on they ride along on the next ask.',

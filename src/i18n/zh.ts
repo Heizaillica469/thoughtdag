@@ -789,6 +789,7 @@ export const zh: Record<keyof typeof en, string> = {
   'recall.reachFullTitle': '改成全量回忆',
   'recall.reachFullMsg': '全量会把索引里全部 {n} 条对话都交给判断模型：每次提问约 {s} 秒、约 {c} 美元，索引越大越慢越贵。测试里深挖答对的题数和全量一样。确定改成全量？',
   'recall.reachFullOk': '改成全量',
+  'recall.reachFullEmpty': '索引里还没有可以交给判断模型的对话，或者索引正在重建。先用轻量或深挖问一次，索引建好后再选全量。',
   'panel.recallReach': '搜索范围：{r}',
   'panel.recallJudging': '判断模型正在看候选：{done}/{total}',
   'panel.recallOffHint': '回忆已关。这个节点留着 {n} 条回忆，打开回忆后下次提问会带上。',
