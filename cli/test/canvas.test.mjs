@@ -175,6 +175,25 @@ test('the app\'s own canvas records are a default root: found without --canvas, 
   assert.match(run('status'), /6 sessions in 7 files/);
 });
 
+test('an archived node is out of the record: no turn, no wire, no commit, and the words are not found (#51)', () => {
+  const file = join(canvasRoot, 'archived.thoughtdag.json');
+  writeFileSync(file, JSON.stringify({ version: 1, name: '有归档', projectId: 'proj-archived', exportedAt: '2026-09-30T10:00:00.000Z',
+    nodes: [
+      node('k1', { question: '量子退火的退火时间怎么选', response: '按能隙。', createdAt: '2026-09-30T09:00:00.000Z' }),
+      node('k2', { question: '搁置的老问题：石墨烯的带隙', response: '零带隙。', createdAt: '2026-09-30T09:05:00.000Z', archived: true }),
+    ],
+    edges: [{ id: 'e1', source: 'k1', target: 'k2', type: 'smoothstep' }],
+    events: [{ t: '2026-09-30T09:05:05.000Z', op: 'commit', id: 'k2', d: { kind: 'request', sha: 'sha256:' + 'ef'.repeat(32), n: 2, m: 'k1' } }] }));
+  const ev = events(file);
+  assert.deepEqual(ev.filter((e) => e.kind === 'turn.started').map((e) => e.turnId.split('#')[1]), ['k1'], 'only the live node starts a turn');
+  assert.ok(!ev.some((e) => e.kind === 'edge.recorded'), 'the wire into the archived node goes with it');
+  assert.ok(!ev.some((e) => e.kind === 'context.committed'), 'so does its commit');
+  assert.ok(!JSON.stringify(ev).includes('石墨烯'), 'none of its words reach the record');
+  run('index');
+  assert.match(run('find', '量子退火').split('\n')[0], /1 turn in 1 session/, 'the live node is found');
+  assert.ok(!run('find', '石墨烯').includes('石墨烯的带隙'), 'the archived node is not');
+});
+
 test('recall reads a canvas turn from the backup', () => {
   const rec = run('recall', 'proj-snn-01', '0');
   assert.ok(rec.includes('surrogate gradient') && rec.includes('它用可导的近似'), rec.slice(0, 200));

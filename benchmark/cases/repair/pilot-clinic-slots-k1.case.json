@@ -130,6 +130,22 @@
         }
       ]
     },
+    "source_prune_stale": {
+      "graph_ops": [
+        {
+          "op": "remove_node",
+          "id": "pollution"
+        },
+        {
+          "op": "add_edge",
+          "from": "update",
+          "to": "step-b"
+        }
+      ],
+      "stale_nodes": [
+        "step-b"
+      ]
+    },
     "subgraph_prune": {
       "graph_ops": [
         {

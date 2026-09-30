@@ -30,6 +30,7 @@
     "step-c",
     "step-d"
   ],
+  "stale_nodes": [],
   "prompt_hash": "1mtye4s",
   "input_token_est": 100,
   "node_order_audit": [

@@ -4,6 +4,7 @@
   "condition": "polluted",
   "graph_ops": [],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "1q4hvuh",
   "input_token_est": 191,
   "node_order_audit": [

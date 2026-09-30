@@ -10,6 +10,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "d9mqlm",
   "input_token_est": 138,
   "node_order_audit": [

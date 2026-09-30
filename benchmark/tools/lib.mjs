@@ -89,10 +89,13 @@ export function probeSequence(graph, finalId = 'final') {
   return seq;
 }
 
-/** Compile one condition state to messages via the product engine. */
-export function compileGraph(graph, finalId, positions) {
+/** Compile one condition state to messages via the product engine. `staleIds`
+    are the nodes whose stored answers predate an upstream change: the product
+    marks their answers in the transcript instead of hiding them, which is what
+    a person sees after deleting a turn without regenerating what followed. */
+export function compileGraph(graph, finalId, positions, staleIds = []) {
   const { nodes, edges } = toProductGraph(graph, positions);
-  const { messages } = buildContext(finalId, nodes, edges);
+  const { messages } = buildContext(finalId, nodes, edges, undefined, undefined, undefined, staleIds);
   const inputTokens = countTokens(messages.map((m) => m.content).join('\n'));
   return {
     messages,

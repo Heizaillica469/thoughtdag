@@ -52,9 +52,19 @@ for (const sid of suiteIds) {
     if (!Object.keys(c.conditions).length) err(`${c.id}: no conditions`);
 
     if (track === 'repair') {
-      const REQUIRED = ['clean', 'polluted', 'source_prune', 'subgraph_prune', 'recompute_descendants'];
+      const REQUIRED = ['clean', 'polluted', 'source_prune', 'source_prune_stale', 'subgraph_prune', 'recompute_descendants'];
       for (const r of REQUIRED) if (!c.conditions[r]) err(`${c.id}: missing required condition ${r}`);
       const chain = contaminationChain(c);
+      // the stale cell is source_prune with the product's mark on every contaminated replay that stays
+      const sps = c.conditions.source_prune_stale;
+      if (sps) {
+        if (JSON.stringify(sps.graph_ops) !== JSON.stringify(c.conditions.source_prune?.graph_ops)) err(`${c.id}: source_prune_stale must apply the same graph_ops as source_prune`);
+        if (JSON.stringify([...(sps.stale_nodes ?? [])].sort()) !== JSON.stringify([...chain].sort())) err(`${c.id}: source_prune_stale.stale_nodes (${(sps.stale_nodes ?? []).join(',')}) must be the contamination chain (${chain.join(',')})`);
+      }
+      for (const [cond, spec] of Object.entries(c.conditions)) {
+        const g = applyOps(c.graph, spec.graph_ops);
+        for (const id of spec.stale_nodes ?? []) if (!g.nodes.some((n) => n.id === id)) err(`${c.id}/${cond}: stale_nodes names ${id}, which the condition's graph does not have`);
+      }
       const depth = c.construction.propagation_depth;
       if (depth !== chain.length) err(`${c.id}: propagation_depth=${depth} but ${chain.length} contaminated descendants reachable (${chain.join('→')})`);
       const rec = c.conditions.recompute_descendants?.recompute_nodes ?? [];

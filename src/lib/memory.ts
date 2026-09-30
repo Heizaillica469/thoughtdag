@@ -5,7 +5,7 @@ import { whyBridge } from './why-bridge';
 import { t, fmt } from '../i18n';
 import { judgeAvailable, decideMemory, MEMORY_DURABLE_BAR, MEMORY_PROJECT_BAR, MEMORY_STATED_BAR } from './judge';
 import { topicsOf, TOPIC_BAR } from './topics';
-import { profileLines, docLines, mergeIntoDoc, restoreDoc, addInbox, migrateLegacyMemories, type ProfileKind } from './profile';
+import { profileLines, docLines, mergeIntoDoc, restoreDoc, addInbox, migrateLegacyMemories, CREDENTIAL_PATTERN, type ProfileKind, type FactOrigin } from './profile';
 
 // Ambient long-term memory. The contract, agreed 2026-07 and reshaped
 // 2026-09-25:
@@ -40,9 +40,12 @@ export interface MemoryEntry {
 //   project     what they are doing now. Filed to the topic's dossier, where
 //               it is merged with the conversations themselves; bar 0.7.
 //   Never stored: product mechanics, one-off task details, verbatim blocks,
-//   credentials (pattern-blocked below as a code-level backstop).
+//   credentials (pattern-blocked as a code-level backstop, here at admission
+//   and again in profile.ts on every line a rewrite produces).
+//   The stated/inferred evidence is decided once, here, and travels with the
+//   line as its provenance (profile.ts LineNote): a rewrite cannot re-decide
+//   it from the rewritten words, so it keeps the pre-rewrite line's.
 const SESSION_ADD_CAP = 3; // auto-writes per canvas per visit; updates free
-const CREDENTIAL_PATTERN = /sk-[a-zA-Z0-9_-]{8,}|api[ _-]?key|password|token|secret/i;
 // keyed by canvas id; cleared when the canvas is switched, so one canvas's
 // three writes never silence the others and a return visit starts over (#47)
 const sessionAddCounts = new Map<string, number>();
@@ -162,8 +165,8 @@ async function fileProjectFact(text: string, from: string | undefined): Promise<
 }
 
 /** A preference or identity fact is merged into its document; the toast can undo the rewrite. */
-async function mergeProfileFact(kind: ProfileKind, text: string): Promise<void> {
-  const { before } = await mergeIntoDoc(kind, text);
+async function mergeProfileFact(kind: ProfileKind, text: string, origin: FactOrigin): Promise<void> {
+  const { before } = await mergeIntoDoc(kind, text, origin);
   toast('info', fmt(t(kind === 'preferences' ? 'memory.mergedPreferences' : 'memory.mergedIdentity'), { t: text.slice(0, 60) }), 8000, {
     label: t('memory.undo'),
     run: () => restoreDoc(kind, before),
@@ -214,7 +217,7 @@ export function judgeMemory(question: string, response: string, canvas?: MemoryC
         sessionAddCounts.set(capKey, (sessionAddCounts.get(capKey) ?? 0) + 1);
       }
       if (category === 'project') await fileProjectFact(text, canvas?.name);
-      else await mergeProfileFact(category === 'identity' ? 'identity' : 'preferences', text);
+      else await mergeProfileFact(category === 'identity' ? 'identity' : 'preferences', text, { evidence: verdict.evidence === 'stated' ? 'stated' : 'inferred', ...(canvas?.name ? { from: canvas.name } : {}) });
     } catch { /* background judge failures are silent by design */ }
   })();
 }

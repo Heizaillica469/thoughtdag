@@ -23,6 +23,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "1dolct8",
   "input_token_est": 121,
   "node_order_audit": [

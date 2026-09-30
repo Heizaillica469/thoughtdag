@@ -25,6 +25,7 @@
     "step-b",
     "step-c"
   ],
+  "stale_nodes": [],
   "prompt_hash": "1r3qr06",
   "input_token_est": 154,
   "node_order_audit": [

@@ -88,7 +88,7 @@ interface TextTurn { q: string; a: string; m?: string }
 interface TextIndex { version: number; sessions: Record<string, number> }
 interface TextLine extends TextTurn { k: string; i: number }
 
-const INDEX_VERSION = 13; // 13: failed tool calls are no footprints (#50)
+const INDEX_VERSION = 14; // 14: archived canvas nodes leave the record (#51); 13: failed tool calls are no footprints (#50)
 const EXCERPT = 200;
 
 const HOME = process.env.THOUGHTDAG_HOME ?? path.join(os.homedir(), '.thoughtdag');

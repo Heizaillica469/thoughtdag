@@ -15,6 +15,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "hpnbx0",
   "input_token_est": 99,
   "node_order_audit": [

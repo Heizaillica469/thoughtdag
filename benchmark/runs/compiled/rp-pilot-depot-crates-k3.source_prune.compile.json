@@ -14,6 +14,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "1cvtodm",
   "input_token_est": 237,
   "node_order_audit": [

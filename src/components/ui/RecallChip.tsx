@@ -1,33 +1,45 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUiStore, confirmDialog, toast } from '../../lib/ui-store';
-import { RECALL_SCALES, reachEstimate, type RecallReach, type RecallScale } from '../../lib/recall';
+import { RECALL_SCALES, reachEstimate, recallFolder, folderTail, type RecallReach, type RecallScale } from '../../lib/recall';
 import { judgeConfigured } from '../../lib/judge';
 import { whyBridge } from '../../lib/why-bridge';
 import { useT, fmt } from '../../i18n';
 
 // Recall, as a quiet chip beside the two search icons: its name, and when on,
-// its reach. The chip opens a small menu: the switch, the reach, the amount.
-// What is changed there holds for the next ask only (the ask spends it);
-// "set as default" writes it back to the defaults the judge page shows.
+// its reach. The chip opens a small menu: the switch, the reach, the amount,
+// the sources (every conversation, or only those run under the canvas's
+// folder). What is changed there holds for the next ask only (the ask spends
+// it); "set as default" writes it back to the defaults the judge page shows.
 export default function RecallChip() {
   const t = useT();
   const enabled = useUiStore((s) => s.recallEnabled);
   const reachDefault = useUiStore((s) => s.recallReach);
   const scaleDefault = useUiStore((s) => s.recallScale);
+  const cwdOnlyDefault = useUiStore((s) => s.recallCwdOnly);
   const override = useUiStore((s) => s.recallOverride);
   const setOverride = useUiStore((s) => s.setRecallOverride);
   const setEnabled = useUiStore((s) => s.setRecallEnabled);
   const setReachDefault = useUiStore((s) => s.setRecallReach);
   const setScaleDefault = useUiStore((s) => s.setRecallScale);
+  const setCwdOnlyDefault = useUiStore((s) => s.setRecallCwdOnly);
   const judgeCfg = useUiStore((s) => s.judge);
   const judged = judgeConfigured(judgeCfg);
   const on = override?.enabled ?? enabled;
   const reach = override?.reach ?? reachDefault;
   const scale = override?.scale ?? scaleDefault;
+  const cwdOnly = override?.cwdOnly ?? cwdOnlyDefault;
   // the menu is a portal on the body, placed by the chip's rect at open time: inside a card it would
   // otherwise sit in the node's stacking context, under the next card
   const [open, setOpen] = useState<{ left: number; bottom: number } | null>(null);
+  // the canvas's folder, looked up when the menu opens (it can change with the canvas)
+  const [folder, setFolder] = useState<string | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    void recallFolder().then((f) => { if (alive) setFolder(f); });
+    return () => { alive = false; };
+  }, [open]);
   const root = useRef<HTMLDivElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -49,9 +61,9 @@ export default function RecallChip() {
     }
     setOverride({ reach: r });
   };
-  const changed = !!override && ((override.enabled !== undefined && override.enabled !== enabled) || (override.reach !== undefined && override.reach !== reachDefault) || (override.scale !== undefined && override.scale !== scaleDefault));
+  const changed = !!override && ((override.enabled !== undefined && override.enabled !== enabled) || (override.reach !== undefined && override.reach !== reachDefault) || (override.scale !== undefined && override.scale !== scaleDefault) || (override.cwdOnly !== undefined && override.cwdOnly !== cwdOnlyDefault));
   const setDefault = () => {
-    setEnabled(on); setReachDefault(reach); setScaleDefault(scale); setOverride(null);
+    setEnabled(on); setReachDefault(reach); setScaleDefault(scale); setCwdOnlyDefault(cwdOnly); setOverride(null);
     toast('success', t('recall.menuDefaultDone'), 3000);
     setOpen(null);
   };
@@ -71,9 +83,10 @@ export default function RecallChip() {
         data-recall-toggle
         data-recall-on={on ? 'on' : 'off'}
         data-recall-reach={on ? reach : undefined}
+        data-recall-cwd={on && cwdOnly ? 'on' : undefined}
       >
         {on && <span className="w-1.5 h-1.5 rounded-full bg-accent" aria-hidden />}
-        <span>{on ? fmt(t('recall.chipOn'), { r: reachLabel(reach) }) : t('recall.chip')}</span>
+        <span>{on ? fmt(t('recall.chipOn'), { r: cwdOnly ? `${reachLabel(reach)} · ${t('recall.sourceCwd')}` : reachLabel(reach) }) : t('recall.chip')}</span>
       </button>
       {open && createPortal(
         <div ref={menu} style={{ position: 'fixed', left: open.left, bottom: open.bottom }} className="w-[296px] rounded-xl border border-line bg-card shadow-lg p-3 z-[90] text-xs space-y-2.5" data-recall-menu onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
@@ -93,6 +106,13 @@ export default function RecallChip() {
             <span className="text-ink-faint whitespace-nowrap" title={t('recall.scaleHint')}>{t('recall.menuScale')}</span>
             <div className="flex gap-0.5" data-recall-menu-scale>
               {(['lean', 'standard', 'generous'] as RecallScale[]).map((s) => seg(s, scale === s, !on, `${scaleLabel(s)} ${RECALL_SCALES[s].budget / 1000}k`, () => setOverride({ scale: s })))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-ink-faint whitespace-nowrap" title={t('recall.sourceHint')}>{t('recall.menuSource')}</span>
+            <div className="flex gap-0.5 min-w-0" data-recall-menu-source>
+              {seg('all', !cwdOnly, !on, t('recall.sourceAll'), () => setOverride({ cwdOnly: false }))}
+              {seg('cwd', cwdOnly, !on || !folder, folder ? `${t('recall.sourceCwd')} ${folderTail(folder)}` : t('recall.sourceCwd'), () => setOverride({ cwdOnly: true }), folder ? folder : on ? t('recall.sourceCwdNone') : undefined)}
             </div>
           </div>
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-line/70">

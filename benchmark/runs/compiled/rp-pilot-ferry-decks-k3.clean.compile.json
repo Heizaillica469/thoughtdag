@@ -41,6 +41,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "su8vcl",
   "input_token_est": 183,
   "node_order_audit": [

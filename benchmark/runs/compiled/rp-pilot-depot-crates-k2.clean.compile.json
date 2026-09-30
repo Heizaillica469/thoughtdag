@@ -32,6 +32,7 @@
     }
   ],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "1nlujd0",
   "input_token_est": 205,
   "node_order_audit": [

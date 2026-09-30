@@ -211,6 +211,13 @@
           "graph_ops"
         ],
         "properties": {
+          "stale_nodes": {
+            "type": "array",
+            "description": "nodes whose answers enter the compiled context under the product's stale mark (an answer written against an earlier upstream); the mark is a transcript annotation, the node set is unchanged",
+            "items": {
+              "type": "string"
+            }
+          },
           "graph_ops": {
             "type": "array",
             "items": {

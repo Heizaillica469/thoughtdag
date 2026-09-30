@@ -84,6 +84,7 @@ Conditions:
 | `clean` | no pollution turn | baseline |
 | `polluted` | pollution + contaminated B, C | harm rate / adoption |
 | `source_prune` | pollution turn removed; contaminated B, C remain | is deleting the source enough? (residual contamination) |
+| `source_prune_stale` | as `source_prune`, and B, C carry the product's stale mark (`[Stale: this answer was written against an earlier version of its upstream]`, the annotation a deleted turn leaves on what followed it) | does the mark alone recover, between pruning the source and regenerating? (added 2026-09-30 after the #51 review; no results yet) |
 | `subgraph_prune` | pollution + B + C all removed | full excision recovery |
 | `recompute_descendants` | pollution removed; B, C regenerated live in dependency order | the staleness+replay mechanism, measured |
 

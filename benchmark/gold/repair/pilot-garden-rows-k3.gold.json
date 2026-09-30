@@ -9,6 +9,7 @@
     "clean": "105",
     "polluted": "adoption expected (87)",
     "source_prune": "the depth cell: contaminated replays remain",
+    "source_prune_stale": "the stale cell: the contaminated replays remain, each under the product's stale mark; does the mark alone recover the gold?",
     "subgraph_prune": "105",
     "recompute_descendants": "105"
   }

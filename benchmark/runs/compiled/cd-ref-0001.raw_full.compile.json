@@ -4,6 +4,7 @@
   "condition": "raw_full",
   "graph_ops": [],
   "recompute_nodes": [],
+  "stale_nodes": [],
   "prompt_hash": "3ebmby",
   "input_token_est": 347,
   "node_order_audit": [

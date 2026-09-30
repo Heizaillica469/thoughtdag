@@ -1,6 +1,8 @@
 # Benchmark STATUS
 
-Last updated: 2026-08-21. Pilot / reference results only; never an authoritative leaderboard. The benchmark and the v2 report are PUBLIC (repo + chenxiachan.github.io/thoughtdag/research/context-repair-pilot-v2/).
+Last updated: 2026-09-30. Pilot / reference results only; never an authoritative leaderboard. The benchmark and the v2 report are PUBLIC (repo + chenxiachan.github.io/thoughtdag/research/context-repair-pilot-v2/).
+
+2026-09-30: every repair case gained a sixth condition, `source_prune_stale` (source pruned, the contaminated replays stay under the product's stale mark). It is compiled and validated but has NOT been run: the tables below are the five-condition pilot as captured in August. A rerun on the pilot models is the next wave.
 
 ## Pilot v1 cross-model comparison — COMPLETE (4 models × 135 conditions each, zero capture failures)
 

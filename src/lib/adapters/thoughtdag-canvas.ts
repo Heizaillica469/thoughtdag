@@ -16,6 +16,11 @@ import { THOUGHTDAG_MANIFEST } from '../events/manifests';
 // Mirrored nodes (importSource) are placed, not restated: their turn
 // events carry `mirrorOf` and no message text — those facts live in the
 // runner's session and would otherwise be counted twice.
+//
+// Archived nodes are out of the record: the person put them aside, so
+// they leave the context, the search and the recall pool together (#51).
+// Wires and commits that touch one go with it; unarchiving brings it back
+// on the next index.
 
 export interface CanvasBackup {
   version?: number;
@@ -73,10 +78,11 @@ export function canvasToEvents(backup: CanvasBackup, opts: { file: string; sourc
 
   const turnIdOf = (nodeId: string): string => `${sid}#${nodeId}`;
   // a node's turn index: file order, which the store keeps as creation order
+  const kept = backup.nodes.filter((n) => !n.data.archived);
   const index = new Map<string, number>();
-  backup.nodes.forEach((n, i) => index.set(n.id, i));
+  kept.forEach((n, i) => index.set(n.id, i));
 
-  for (const n of backup.nodes) {
+  for (const n of kept) {
     const d = n.data;
     const tid = turnIdOf(n.id);
     const i = index.get(n.id) ?? 0;
@@ -211,7 +217,7 @@ export function canvasToEvents(backup: CanvasBackup, opts: { file: string; sourc
   // model, the member nodes. Ids come from node and time, never from the
   // log's position — the log is capped and may be trimmed.
   for (const ev of backup.events ?? []) {
-    if (ev.op !== 'commit' || !ev.id || !ev.d) continue;
+    if (ev.op !== 'commit' || !ev.id || !ev.d || !index.has(ev.id)) continue;
     const sha = typeof ev.d.sha === 'string' ? ev.d.sha : '';
     if (!sha) continue;
     const kind = ev.d.kind === 'bundle' ? 'bundle' : 'request';

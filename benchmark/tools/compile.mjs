@@ -17,13 +17,14 @@ for (const [track, name] of CASES) {
   const tokensByCondition = {};
   for (const [cond, spec] of Object.entries(c.conditions)) {
     const g = applyOps(c.graph, spec.graph_ops);
-    const compiled = compileGraph(g, 'final', LAYOUTS[c.id]);
+    const compiled = compileGraph(g, 'final', LAYOUTS[c.id], spec.stale_nodes ?? []);
     tokensByCondition[cond] = compiled.input_token_est;
     const artifact = {
       compiler_version: COMPILER_VERSION,
       case_id: c.id, condition: cond,
       graph_ops: spec.graph_ops,
       recompute_nodes: spec.recompute_nodes ?? [],
+      stale_nodes: spec.stale_nodes ?? [],
       prompt_hash: compiled.prompt_hash,
       input_token_est: compiled.input_token_est,
       node_order_audit: compiled.node_order_audit,

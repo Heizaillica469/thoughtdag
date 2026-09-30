@@ -20,6 +20,7 @@
   "recompute_nodes": [
     "step-b"
   ],
+  "stale_nodes": [],
   "prompt_hash": "1m4oxhb",
   "input_token_est": 91,
   "node_order_audit": [

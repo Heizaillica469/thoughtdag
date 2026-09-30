@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, Download, ExternalLink, Loader2, RefreshCw, Sparkles, Tags } from 'lucide-react';
 import { useUiStore, toast } from '../../lib/ui-store';
 import { whyBridge, hasWhy } from '../../lib/why-bridge';
-import { docLines, setDocText, migrateLegacyMemories, removeInbox, type ProfileKind } from '../../lib/profile';
+import { docLines, lineNote, setDocText, migrateLegacyMemories, removeInbox, type ProfileKind, type LineNote } from '../../lib/profile';
 import { buildDossier, updateDossier, rebuildDossier, editDossierSection, dossierEmpty, SECTION_ORDER, SECTION_KEY, AUTO_MERGE_PENDING, type DossierSection } from '../../lib/dossier';
 import { openWhyLink } from '../../lib/atlas/live-mirror';
 import { downloadFile } from '../../lib/export';
@@ -21,6 +21,7 @@ import { useT, fmt } from '../../i18n';
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 const day = (iso: string | null | undefined): string => (iso ? iso.slice(0, 10) : '');
 const autoMerged = new Set<string>();
+const EVIDENCE_KEY = { stated: 'mp.evidenceStated', inferred: 'mp.evidenceInferred', manual: 'mp.evidenceManual', folded: 'mp.evidenceFolded' } as const satisfies Record<LineNote['evidence'], string>;
 
 function Toggle({ on, onChange, testId }: { on: boolean; onChange: (v: boolean) => void; testId: string }) {
   return (
@@ -56,7 +57,7 @@ function ProfileDrawer({ kind, onClose }: { kind: ProfileKind; onClose: () => vo
         {doc.updatedAt && <span className="text-2xs text-ink-faint">{fmt(t('mp.updatedAt'), { d: day(doc.updatedAt) })}</span>}
         <span className="flex-1" />
         {!editing && <button onClick={() => { setText(lines.join('\n')); setEditing(true); }} className="text-xs px-2.5 py-1 rounded-lg border border-line hover:bg-wash" data-mp-profile-edit>{t('mp.edit')}</button>}
-        {lines.length > 0 && <button onClick={() => downloadFile(`thoughtdag-${kind}.json`, JSON.stringify({ kind, lines, updatedAt: doc.updatedAt, changelog: doc.changelog }, null, 2), 'application/json')} className="text-xs px-2 py-1 rounded-lg text-ink-faint hover:text-ink flex items-center gap-1" title={t('memory.exportTitle')}><Download size={12} strokeWidth={1.75} /> {t('mp.export')}</button>}
+        {lines.length > 0 && <button onClick={() => downloadFile(`thoughtdag-${kind}.json`, JSON.stringify({ kind, lines, notes: doc.notes ?? [], updatedAt: doc.updatedAt, changelog: doc.changelog }, null, 2), 'application/json')} className="text-xs px-2 py-1 rounded-lg text-ink-faint hover:text-ink flex items-center gap-1" title={t('memory.exportTitle')}><Download size={12} strokeWidth={1.75} /> {t('mp.export')}</button>}
         <button onClick={onClose} className="text-xs px-2 py-1 rounded-lg text-ink-muted hover:bg-wash">{t('common.close')}</button>
       </div>
       {editing ? (
@@ -71,7 +72,18 @@ function ProfileDrawer({ kind, onClose }: { kind: ProfileKind; onClose: () => vo
       ) : lines.length === 0 ? (
         <p className="text-xs text-ink-faint italic">{t('mp.docEmpty')}</p>
       ) : (
-        <ul className="text-sm text-ink leading-relaxed list-disc pl-5 max-w-[68ch]" data-mp-profile-lines>{lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
+        <ul className="text-sm text-ink leading-relaxed list-disc pl-5 max-w-[68ch]" data-mp-profile-lines>
+          {lines.map((l, i) => {
+            // each line names where it came from, like a dossier sentence names its sources
+            const n = lineNote(doc, l);
+            return (
+              <li key={i}>
+                <span>{l}</span>
+                {n && <span className="ml-1.5 align-baseline inline-flex font-mono text-2xs text-ink-faint border border-line rounded px-1 whitespace-nowrap" title={n.was ? fmt(t('mp.lineWas'), { t: n.was }) : undefined} data-mp-line-note={n.evidence}>{[n.from, day(n.at), t(EVIDENCE_KEY[n.evidence])].filter(Boolean).join(' · ')}</span>}
+              </li>
+            );
+          })}
+        </ul>
       )}
       {doc.changelog.length > 0 && (
         <div className="mt-3 pt-2 border-t border-dashed border-line-strong text-2xs text-ink-muted space-y-0.5">
