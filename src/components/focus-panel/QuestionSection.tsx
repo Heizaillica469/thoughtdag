@@ -5,6 +5,7 @@ import { isImeComposing } from '../../utils';
 import { useT } from '../../i18n';
 import { isViewerMode } from '../../lib/viewer';
 import { toast } from '../../lib/ui-store';
+import SearchToggles from '../ui/SearchToggles';
 
 export default function QuestionSection({
   nodeId,
@@ -105,6 +106,10 @@ export default function QuestionSection({
           />
           {!awaiting && !isHuman && (
             <div className="flex items-center justify-end gap-2 mt-1.5">
+              {/* the node's own switches, what a re-ask runs with; mousedown defaulted away so the textarea keeps focus */}
+              <div className="mr-auto flex items-center gap-1" onMouseDown={(e) => e.preventDefault()} data-edit-toggles>
+                <SearchToggles nodeId={nodeId} size={15} />
+              </div>
               <button
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setEditing(nodeId, false)}

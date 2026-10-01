@@ -705,6 +705,12 @@ export default function ThoughtNode({ id, data }: NodeProps<ThoughtNodeType>) {
                   textarea's blur from racing the click. */}
               {!isHuman && !isAwaitingAsk && (
                 <div className="flex items-center justify-end gap-2 mt-1.5">
+                  {/* the node's own switches (what a re-ask runs with), editable
+                      here; mousedown is defaulted away so the textarea keeps
+                      focus, and stopped so the click never selects the node */}
+                  <div className="mr-auto flex items-center gap-1 nodrag nopan" onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }} onClick={(e) => e.stopPropagation()} data-edit-toggles>
+                    <SearchToggles nodeId={id} size={15} />
+                  </div>
                   <button
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => setEditing(id, false)}

@@ -780,6 +780,8 @@ export const en = {
   'recall.menuReach': 'Search reach',
   'recall.menuScale': 'Context brought in',
   'recall.menuOnce': 'For this ask only',
+  'recall.menuNode': 'This node only, for its re-asks',
+  'models.resolvedLast': 'last run {r}',
   'recall.menuDefault': 'Set as default',
   'recall.menuDefaultDone': 'Set as the default',
   'recall.menuNeedsJudge': 'Connect the decision model to choose this',

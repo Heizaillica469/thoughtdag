@@ -779,6 +779,8 @@ export const zh: Record<keyof typeof en, string> = {
   'recall.menuReach': '搜索范围',
   'recall.menuScale': '带入上下文',
   'recall.menuOnce': '只对这一次提问生效',
+  'recall.menuNode': '只改这个节点，重问时用',
+  'models.resolvedLast': '上次运行 {r}',
   'recall.menuDefault': '设为默认',
   'recall.menuDefaultDone': '已设为默认',
   'recall.menuNeedsJudge': '接入判断模型后可选',

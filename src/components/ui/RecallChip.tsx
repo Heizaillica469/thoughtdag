@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUiStore, confirmDialog, toast } from '../../lib/ui-store';
+import { useStore } from '../../store';
 import { RECALL_SCALES, reachEstimate, type RecallReach, type RecallScale } from '../../lib/recall';
 import { judgeConfigured } from '../../lib/judge';
 import { whyBridge } from '../../lib/why-bridge';
@@ -10,7 +11,9 @@ import { useT, fmt } from '../../i18n';
 // its reach. The chip opens a small menu: the switch, the reach, the amount.
 // What is changed there holds for the next ask only (the ask spends it);
 // "set as default" writes it back to the defaults the judge page shows.
-export default function RecallChip() {
+// With a `nodeId` the chip is that node's own snapshot (its question editor):
+// the menu edits the node, which its re-asks then run with; no default row.
+export default function RecallChip({ nodeId }: { nodeId?: string } = {}) {
   const t = useT();
   const enabled = useUiStore((s) => s.recallEnabled);
   const reachDefault = useUiStore((s) => s.recallReach);
@@ -22,9 +25,15 @@ export default function RecallChip() {
   const setScaleDefault = useUiStore((s) => s.setRecallScale);
   const judgeCfg = useUiStore((s) => s.judge);
   const judged = judgeConfigured(judgeCfg);
-  const on = override?.enabled ?? enabled;
-  const reach = override?.reach ?? reachDefault;
-  const scale = override?.scale ?? scaleDefault;
+  const node = useStore((s) => (nodeId ? s.nodes.find((n) => n.id === nodeId)?.data : undefined));
+  const on = nodeId ? (node?.recall ?? enabled) : (override?.enabled ?? enabled);
+  const reach = nodeId ? (node?.recallReach ?? reachDefault) : (override?.reach ?? reachDefault);
+  const scale = nodeId ? (node?.recallScale ?? scaleDefault) : (override?.scale ?? scaleDefault);
+  // a choice goes to the next ask's override, or, for a node, into the node itself
+  const apply = (p: { enabled?: boolean; reach?: RecallReach; scale?: RecallScale }) => {
+    if (!nodeId) { setOverride(p); return; }
+    useStore.setState((s) => ({ nodes: s.nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...(p.enabled !== undefined ? { recall: p.enabled } : {}), ...(p.reach ? { recallReach: p.reach } : {}), ...(p.scale ? { recallScale: p.scale } : {}) } } : n)) }));
+  };
   // the menu is a portal on the body, placed by the chip's rect at open time: inside a card it would
   // otherwise sit in the node's stacking context, under the next card
   const [open, setOpen] = useState<{ left: number; bottom: number } | null>(null);
@@ -50,9 +59,9 @@ export default function RecallChip() {
       const ok = await confirmDialog({ title: t('recall.reachFullTitle'), message: fmt(t('recall.reachFullMsg'), { n: total.toLocaleString(), s: String(Math.round(est.seconds)), c: est.dollars.toFixed(2) }), confirmLabel: t('recall.reachFullOk') });
       if (!ok) return;
     }
-    setOverride({ reach: r });
+    apply({ reach: r });
   };
-  const changed = !!override && ((override.enabled !== undefined && override.enabled !== enabled) || (override.reach !== undefined && override.reach !== reachDefault) || (override.scale !== undefined && override.scale !== scaleDefault));
+  const changed = !nodeId && !!override && ((override.enabled !== undefined && override.enabled !== enabled) || (override.reach !== undefined && override.reach !== reachDefault) || (override.scale !== undefined && override.scale !== scaleDefault));
   const setDefault = () => {
     setEnabled(on); setReachDefault(reach); setScaleDefault(scale); setOverride(null);
     toast('success', t('recall.menuDefaultDone'), 3000);
@@ -79,10 +88,11 @@ export default function RecallChip() {
         <span>{on ? fmt(t('recall.chipOn'), { r: reachLabel(reach) }) : t('recall.chip')}</span>
       </button>
       {open && createPortal(
-        <div ref={menu} style={{ position: 'fixed', left: open.left, bottom: open.bottom }} className="w-[296px] rounded-xl border border-line bg-card shadow-lg p-3 z-[90] text-xs space-y-2.5" data-recall-menu onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+        // mousedown is swallowed AND defaulted away: inside a question editor the textarea must keep its focus (its blur closes the editor)
+        <div ref={menu} style={{ position: 'fixed', left: open.left, bottom: open.bottom }} className="w-[296px] rounded-xl border border-line bg-card shadow-lg p-3 z-[90] text-xs space-y-2.5" data-recall-menu data-recall-menu-scope={nodeId ? 'node' : 'ask'} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-ink font-medium">{t('recall.menuOn')}</span>
-            <button type="button" role="switch" aria-checked={on} onClick={() => setOverride({ enabled: !on })} className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-accent' : 'bg-line-strong'}`} data-recall-menu-switch>
+            <button type="button" role="switch" aria-checked={on} onClick={() => apply({ enabled: !on })} className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-accent' : 'bg-line-strong'}`} data-recall-menu-switch>
               <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : ''}`} />
             </button>
           </div>
@@ -95,12 +105,12 @@ export default function RecallChip() {
           <div className="flex items-center justify-between gap-2">
             <span className="text-ink-faint whitespace-nowrap" title={t('recall.scaleHint')}>{t('recall.menuScale')}</span>
             <div className="flex gap-0.5" data-recall-menu-scale>
-              {(['lean', 'standard', 'generous'] as RecallScale[]).map((s) => seg(s, scale === s, !on, `${scaleLabel(s)} ${RECALL_SCALES[s].budget / 1000}k`, () => setOverride({ scale: s })))}
+              {(['lean', 'standard', 'generous'] as RecallScale[]).map((s) => seg(s, scale === s, !on, `${scaleLabel(s)} ${RECALL_SCALES[s].budget / 1000}k`, () => apply({ scale: s })))}
             </div>
           </div>
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-line/70">
-            <span className="text-2xs text-ink-faint">{t('recall.menuOnce')}</span>
-            <button type="button" onClick={setDefault} disabled={!changed} className="text-2xs text-accent hover:underline disabled:opacity-40 disabled:no-underline" data-recall-menu-default>{t('recall.menuDefault')}</button>
+            <span className="text-2xs text-ink-faint">{t(nodeId ? 'recall.menuNode' : 'recall.menuOnce')}</span>
+            {!nodeId && <button type="button" onClick={setDefault} disabled={!changed} className="text-2xs text-accent hover:underline disabled:opacity-40 disabled:no-underline" data-recall-menu-default>{t('recall.menuDefault')}</button>}
           </div>
         </div>,
         document.body,

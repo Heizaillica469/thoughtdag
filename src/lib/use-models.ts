@@ -3,6 +3,7 @@ import { API_BASE } from './constants';
 import { storedProviders, pushProviders } from './runtime-providers';
 import { agentCatalog, AGENT_PROVIDER, AGENT_RUNTIMES, agentTarget, isAgentModel, type RuntimeStatus } from './agents/agent-runtime';
 import type { AgentRuntime } from '../types';
+import { t, fmt } from '../i18n';
 
 export interface ModelInfo {
   id: string;
@@ -92,13 +93,15 @@ function resolvedNames(): Record<string, string> {
   try { const v = JSON.parse(localStorage.getItem(AGENT_NAMES_KEY) ?? '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; }
 }
 
-/** An alias entry shows the model it resolved to, once a turn has told us. */
+/** An alias entry shows the model it resolved to, once a turn has told us —
+ *  marked as the LAST run's, since an alias means "the newest" and the CLI may
+ *  have moved on since (the next turn reports the new name and the label follows). */
 function withResolvedNames(models: ModelInfo[]): ModelInfo[] {
   const names = resolvedNames();
   return models.map((m) => {
     const r = m.provider === AGENT_PROVIDER ? names[m.id] : undefined;
     if (!r || m.id.endsWith('/' + r) || m.name.includes(r)) return m;
-    return { ...m, name: `${m.name} · ${r}` };
+    return { ...m, name: `${m.name} · ${fmt(t('models.resolvedLast'), { r })}` };
   });
 }
 

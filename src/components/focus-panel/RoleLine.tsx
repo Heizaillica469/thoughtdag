@@ -9,11 +9,11 @@ import type { ThoughtData } from '../../types';
 
 // The panel's summary kicker: role · tokens · materials, in one quiet line
 // at the top. The narrow role model: a rolePrompt on a node is the system
-// prompt for it and everything downstream (nearest ancestor wins). It is
-// edited where it lives — on the node that set it, or on a root; clicking
-// the role text opens the editor. Elsewhere it is a read-only "inherited"
-// segment. Machine-step personas don't use this at all; they live in
-// prompt text.
+// prompt for it and everything downstream (nearest ancestor wins). Clicking
+// the role text opens the editor on ANY node: on the node that set it, the
+// text is its own; elsewhere the inherited text comes prefilled and saving
+// gives this node a role of its own (the "inherited" tag goes). Machine-step
+// personas don't use this at all; they live in prompt text.
 
 export default function RoleLine({
   nodeId,
@@ -31,7 +31,10 @@ export default function RoleLine({
 
   const own = data.rolePrompt;
   const effective = own || inheritedRole;
-  const canEdit = !!own || data.isRoot;
+  // any node may set its own role (a system prompt for it and everything
+  // downstream, nearest ancestor wins): an inherited one opens prefilled, so
+  // a follow-up can refine the root's role instead of only reading it
+  const canEdit = true;
   const attachCount = (data.attachments || []).length;
 
   const save = () => {
@@ -47,7 +50,7 @@ export default function RoleLine({
         {effective ? (
           canEdit ? (
             <button
-              onClick={() => { if (isViewerMode) return; setValue(own ?? ''); setEditing(true); }}
+              onClick={() => { if (isViewerMode) return; setValue(own ?? effective); setEditing(true); }}
               className="text-warm hover:underline decoration-dotted underline-offset-2 truncate font-medium max-w-[45%] shrink-0"
               title={`${effective} — ${t('role.edit')}`}
             >
