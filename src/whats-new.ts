@@ -40,6 +40,17 @@ const DOCS = 'https://chenxiachan.github.io/thoughtdag/docs';
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
     // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
+    version: '0.5.11',
+    date: '2026-10-01',
+    announce: false,
+    lead: {
+      zh: '一批围绕提问的收口。空节点里选的全量回忆现在真的会跑，之前发送时被丢掉了；问题编辑器（卡片和侧栏）里多了这个节点自己的联网、学术、回忆开关，改的只是这个节点；任何节点都能设自己的角色，编辑器改成侧栏头部下方的整宽条；问题也按 Markdown 渲染；全量回忆的确认框按实测重算，只说要多等一会儿和费用；模型选择器把别名解析到的型号标为上次运行；Harness 插件对话页的浮动开关挪到标题行下方，Windows 上不再被拖拽区吞掉点击。',
+      en: 'A batch around asking. A full recall chosen on an empty card now runs (the choice was dropped on send); the question editors (card and panel) carry the node\'s own web, scholar and recall switches, and edit only that node; any node can set its own role, in a full-width editor under the panel header; questions render as Markdown; the full-recall dialog is re-measured and names the wait and the cost; the model picker marks an alias\'s resolved model as the last run\'s; the harness plugin\'s floating switch sits below the title row, so the Windows drag region no longer swallows its clicks.',
+    },
+    items: [],
+  },
+  {
+    // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
     version: '0.5.10',
     date: '2026-10-01',
     announce: false,
