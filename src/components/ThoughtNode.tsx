@@ -748,9 +748,10 @@ export default function ThoughtNode({ id, data }: NodeProps<ThoughtNodeType>) {
             // keeps the wheel on the text, not the canvas zoom).
             <div
               onDoubleClick={handleDoubleClickQuestion}
-              className="text-sm text-ink font-semibold mb-3 cursor-pointer hover:bg-wash rounded-xl px-2 py-1.5 -mx-1 transition-colors max-h-[180px] overflow-y-auto nowheel nopan"
+              className="question-md text-sm text-ink font-semibold mb-3 cursor-pointer hover:bg-wash rounded-xl px-2 py-1.5 -mx-1 transition-colors max-h-[180px] overflow-y-auto nowheel nopan"
             >
-              {data.question}
+              {/* a question is markdown like an answer (lists, code, emphasis), set compact; the plaques above keep the plain text */}
+              <Markdown>{data.question}</Markdown>
             </div>
           )}
 

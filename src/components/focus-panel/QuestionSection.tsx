@@ -6,6 +6,7 @@ import { useT } from '../../i18n';
 import { isViewerMode } from '../../lib/viewer';
 import { toast } from '../../lib/ui-store';
 import SearchToggles from '../ui/SearchToggles';
+import { Markdown } from '../Markdown';
 
 export default function QuestionSection({
   nodeId,
@@ -133,9 +134,9 @@ export default function QuestionSection({
       ) : (
         <div
           onDoubleClick={handleDoubleClickQuestion}
-          className="text-sm text-ink font-semibold cursor-pointer hover:bg-wash rounded-xl px-2 py-1.5 -mx-1 transition-colors max-h-[240px] overflow-y-auto"
+          className="question-md text-sm text-ink font-semibold cursor-pointer hover:bg-wash rounded-xl px-2 py-1.5 -mx-1 transition-colors max-h-[240px] overflow-y-auto"
         >
-          {question}
+          <Markdown>{question}</Markdown>
         </div>
       )}
     </div>
