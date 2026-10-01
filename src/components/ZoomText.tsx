@@ -18,6 +18,10 @@ import { LEVEL_FONT, pickLevel, ladderPieces, needsSpace, type LadderLevel } fro
 
 const DUR = 320;
 const EASE = 'cubic-bezier(.2,.7,.2,1)';
+/** a token that is only closing punctuation (the segmenter cuts marks into tokens of their own) */
+const CLOSING = /^[,.;:!?)\]}”’」』】〕〉》〗〙）］｝。，、；：！？…～%‰]+$/;
+/** …or only opening punctuation */
+const OPENING = /^[([{“‘「『【〔〈《〖〘（［｛]+$/;
 
 /** The level for the live zoom, with hysteresis kept across renders; the component re-renders only when the level changes. */
 function useLadderLevel(): LadderLevel {
@@ -70,14 +74,23 @@ export function LadderMorph({ ladder, level, fontSize, ink = true, weight = 'fon
 
   // Spans: a surviving word stays its own span (it slides by id); a run of arriving words becomes ONE span
   // (it only fades), so an abstract of 300 words costs a few dozen spans, not 300.
+  // Punctuation never gets a span of its own: the spans are inline-blocks, and between two of those the
+  // browser breaks lines freely, so a 。 or , in its own box could open a line, which the line-breaking
+  // rules forbid for text. A closing mark rides with the word before it, an opening one with the word after.
   const segments: { id: string; text: string; skeleton: boolean }[] = [];
+  let opening = '';
   items.forEach((p, n) => {
     const glue = n + 1 < items.length && needsSpace(p.text, p.space, items[n + 1].text) ? ' ' : '';
     const isSkeleton = skeleton ? skeleton.has(p.id) : true;
     const last = segments[segments.length - 1];
-    if (!isSkeleton && last && !last.skeleton) last.text += p.text + glue;
-    else segments.push({ id: p.id, text: p.text + glue, skeleton: isSkeleton });
+    if (OPENING.test(p.text) && n + 1 < items.length) { opening += p.text + glue; return; }
+    const text = opening + p.text + glue;
+    opening = '';
+    if (CLOSING.test(p.text) && last) last.text += text;
+    else if (!isSkeleton && last && !last.skeleton) last.text += text;
+    else segments.push({ id: p.id, text, skeleton: isSkeleton });
   });
+  if (opening) { const last = segments[segments.length - 1]; if (last) last.text += opening; else segments.push({ id: 'open', text: opening, skeleton: true }); }
   return (
     <div ref={host} className={`relative leading-[1.3] ${weight} ${className}`} style={{ fontSize: fs }} data-zoom-text data-zoom-level={level}>
       {segments.map((sg) => <span key={sg.id} data-id={sg.id} className={`inline-block whitespace-pre-wrap will-change-transform ${!ink || sg.skeleton ? 'text-ink' : 'text-ink-muted font-medium'}`}>{sg.text}</span>)}
