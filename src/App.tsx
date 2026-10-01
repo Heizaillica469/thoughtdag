@@ -396,8 +396,9 @@ function Canvas() {
         tokenCount: 0, highlights: [], highlightMode: 'tag',
         attachments: [], excludedAttachmentIds: [], includedAttachmentIds: [],
         roleMode: 'inherit', isRoot: false, isBranch: false,
-        webSearch: useUiStore.getState().webSearchEnabled,
-        scholarSearch: useUiStore.getState().scholarSearchEnabled,
+        // the per-ask switches (web, scholar, recall) are snapshotted when the
+        // question is sent (editQuestion), not here: the card shows them under
+        // its question box, and what is set there must be what the ask uses
       },
     }]);
     st.pushHistory();

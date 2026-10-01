@@ -788,7 +788,7 @@ export const en = {
   'recall.reachFull': 'full (costly)',
   'recall.reachHint': 'How many candidates the decision model sees per recall. Light: the 40 best keyword hits, each read in full before judging. Deep: 2,000 hits, judged by their opening lines, the ones that pass read in full; ten-odd seconds and a few cents a question. Full: every turn in the index, keywords or not, timed and priced by the size of the index. Without a decision model only light runs.',
   'recall.reachFullTitle': 'Switch to full recall',
-  'recall.reachFullMsg': 'Full hands every one of the {n} turns in the index to the decision model: about {s} seconds and ${c} per question, more as the index grows. In testing, deep answered as many questions as full. Switch to full?',
+  'recall.reachFullMsg': 'Full hands the index\'s turns (at most {n}; a replayed turn counts once) to the decision model: up to about {s} seconds and ${c} per question, more as the index grows. In testing, deep answered as many questions as full. Switch to full?',
   'recall.reachFullOk': 'Switch to full',
   'recall.reachFullEmpty': 'The index has no conversations to hand to the decision model yet, or it is being rebuilt. Ask once on light or deep; choose full once the index is built.',
   'panel.recallReach': 'search reach: {r}',

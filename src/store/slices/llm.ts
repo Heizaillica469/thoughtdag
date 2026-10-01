@@ -372,6 +372,13 @@ export const createLlmSlice: StateCreator<StoreState, [], [], LlmSlice> = (set, 
         .filter((id) => get().nodes.find((n) => n.id === id)?.data.response).length;
       if (staleCount > 0) toast('info', fmt(t('toast.editMakesStale'), { n: staleCount }), 7000);
     }
+    // A node asked for the first time (an empty card dropped on the canvas)
+    // is an ask like any other: the switches shown under its question box
+    // are snapshotted now, the recall menu's one-ask choice spent here. A
+    // re-worded question keeps the snapshot its node was asked with.
+    const firstAsk = !prevQuestion
+      ? { webSearch: useUiStore.getState().webSearchEnabled, scholarSearch: useUiStore.getState().scholarSearchEnabled, ...recallSnapshot() }
+      : {};
     set((state) => ({
       nodes: state.nodes.map((n) =>
         n.id === nodeId ? { ...n, data: {
@@ -382,6 +389,7 @@ export const createLlmSlice: StateCreator<StoreState, [], [], LlmSlice> = (set, 
           ...(prevQuestion && prevQuestion !== question && n.data.responses.length > 0
             ? { questions: n.data.responses.map((_, i) => n.data.questions?.[i] ?? prevQuestion) }
             : {}),
+          ...firstAsk,
           question, askedAt: new Date().toISOString(), isEditing: false, isLoading: true,
         } } : n
       ),

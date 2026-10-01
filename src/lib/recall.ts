@@ -147,10 +147,12 @@ const JUDGE_PARALLEL = 8;
 const JUDGE_BATCH_TIMEOUT_MS = 30_000;
 /** of a wide pool, how many passing candidates are read in full (the budget then decides what comes in) */
 const WIDE_READ_MAX = 80;
-/** measured 2026-09: ~1.5 s a round of eight batches, ~$0.0007 a batch on the calibrated judge */
+/** Measured 2026-10-01 on a 14,600-turn index (10,500 once replays are counted once): the listing
+ *  took ~4 s, the judge ~0.8 s a round of eight batches, ~$0.0007 a batch on the calibrated judge;
+ *  the whole recall 30 s. The manifest's count includes replayed turns, so this is a ceiling. */
 export function reachEstimate(total: number): { seconds: number; dollars: number } {
   const batches = Math.ceil(total / JUDGE_BATCH);
-  return { seconds: Math.ceil(batches / JUDGE_PARALLEL) * 1.5, dollars: batches * 0.0007 };
+  return { seconds: 4 + Math.ceil(batches / JUDGE_PARALLEL) * 0.8, dollars: batches * 0.0007 };
 }
 /** With a judge, what comes in is decided by probability, not count: at or
  *  above KEEP it comes in (budget permitting); between HOLD and KEEP it is
