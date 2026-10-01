@@ -1261,7 +1261,7 @@ export const en = {
   'model.inherit': 'Model: global default',
   'chat.entryTitle': 'Ask the canvas: the model reads an outline of the whole canvas and answers with numbers; click a number to locate the node',
   'chat.title': 'Ask the canvas',
-  'chat.placeholder': 'Ask this canvas… the answer points at nodes by number',
+  'chat.placeholder': 'Ask this canvas…',
   'chat.focusAll': 'The whole canvas',
   'chat.focusAllHint': 'Select a node and the question focuses on it',
   'recall.reachFullRefreshing': 'The index is refreshing; choose full once it is done.',

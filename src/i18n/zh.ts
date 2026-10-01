@@ -1260,7 +1260,7 @@ export const zh: Record<keyof typeof en, string> = {
   'model.inherit': '模型：跟随全局',
   'chat.entryTitle': '问画布：模型读整张画布的大纲作答，回答里的编号点一下就定位到节点',
   'chat.title': '问画布',
-  'chat.placeholder': '问这张画布……回答会用编号指向节点',
+  'chat.placeholder': '问这张画布……',
   'chat.focusAll': '整张画布',
   'chat.focusAllHint': '选中一个节点，问题就聚焦到它',
   'recall.reachFullRefreshing': '索引正在刷新，刷新完再选全量。',
