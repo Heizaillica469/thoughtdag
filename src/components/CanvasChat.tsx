@@ -38,6 +38,8 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
   const list = useRef<HTMLDivElement>(null);
   useEffect(() => { setTurns(loadTurns(projectId)); }, [projectId]);
   useEffect(() => { if (open) list.current?.scrollTo({ top: list.current.scrollHeight }); }, [open, turns.length, busy]);
+  // a halo left on by a hover must not outlive the dialog
+  useEffect(() => { if (!open) useUiStore.getState().setCondenseHighlightIds([]); }, [open]);
   // the selection is the focus unless the person set it aside for this question
   useEffect(() => { setFocusCleared(false); }, [selectedNodeId]);
   const focusId = !focusCleared && selectedNodeId && nodes.some((n) => n.id === selectedNodeId && !n.data.archived) ? selectedNodeId : null;
@@ -95,14 +97,16 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
   const questionOf = (i: number): string => { for (let k = i - 1; k >= 0; k--) if (turns[k].role === 'user') return turns[k].text; return ''; };
   const chip = (id: string, alias: string, key: string) => {
     const n = nodes.find((x) => x.id === id);
-    return <button key={key} type="button" className="cite-chip" title={n ? nodeLabel(n.data, lang) : alias} onClick={() => onLocate(id)} data-cite={id}>{alias}</button>;
+    return <button key={key} type="button" className="cite-chip" title={n ? nodeLabel(n.data, lang) : alias} onClick={() => onLocate(id)} onMouseEnter={() => useUiStore.getState().setCondenseHighlightIds([id])} onMouseLeave={() => useUiStore.getState().setCondenseHighlightIds([])} data-cite={id}>{alias}</button>;
   };
-  // the answer is markdown with its citations as explore marks: one click handler locates the node a mark names
-  const onAnswerClick = (e: ReactMouseEvent) => {
-    const m = (e.target as HTMLElement).closest?.('mark[data-explore-target]');
-    const id = m?.getAttribute('data-explore-target');
-    if (id) { e.stopPropagation(); onLocate(id); }
-  };
+  // the answer is markdown with its citations as explore marks: one click handler locates the node a mark names,
+  // and hovering a mark lights that node on the canvas (the same halo the condense dialog uses), so the reader
+  // sees where a claim rests without leaving the dialog
+  const markId = (e: ReactMouseEvent): string | null => (e.target as HTMLElement).closest?.('mark[data-explore-target]')?.getAttribute('data-explore-target') || null;
+  const onAnswerClick = (e: ReactMouseEvent) => { const id = markId(e); if (id) { e.stopPropagation(); onLocate(id); } };
+  const light = (ids: string[]) => useUiStore.getState().setCondenseHighlightIds(ids);
+  const onAnswerOver = (e: ReactMouseEvent) => { const id = markId(e); light(id ? [id] : []); };
+  const onAnswerOut = () => light([]);
   return (
     <div className="fixed bottom-4 right-4 z-[85] w-[440px] max-w-[calc(100vw-32px)] max-h-[72vh] flex flex-col rounded-2xl border border-line bg-card shadow-2xl" data-canvas-chat>
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-line shrink-0">
@@ -122,7 +126,7 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
           <div key={turn.id} className="flex flex-col items-start gap-1" data-chat-turn="assistant">
             {turn.error
               ? <div className="max-w-[92%] text-xs text-red-500 bg-red-50 rounded-2xl rounded-bl-md px-3 py-2 break-words">{turn.error}</div>
-              : <div className="max-w-[92%] bg-wash text-ink rounded-2xl rounded-bl-md px-3 py-2 markdown-body text-sm leading-relaxed break-words" onClick={onAnswerClick} data-chat-answer>
+              : <div className="max-w-[92%] bg-wash text-ink rounded-2xl rounded-bl-md px-3 py-2 markdown-body text-sm leading-relaxed break-words" onClick={onAnswerClick} onMouseOver={onAnswerOver} onMouseOut={onAnswerOut} data-chat-answer>
                   <Markdown>{answerForCanvas(turn.text, byAlias, nodes, lang, 'alias')}</Markdown>
                 </div>}
             {!turn.error && (
