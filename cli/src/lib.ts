@@ -1106,13 +1106,20 @@ async function findJson(phrase: string, opts: { scope?: 'q' | 'a' | 'm' | 'all';
  *  answer: what a full-reach recall hands the judge, since find's snippets exist only around a phrase.
  *  `total` counts them all; `offset`/`limit` page; `head` is the characters kept of each field. */
 interface TurnHeadJson { kind: 'turn' | 'memory'; session: string; runner: FactSession['runner']; title: string; cwd: string; file: string; turn: number; at: string | null; q: string; a: string; open: string }
-async function turnsJson(opts: { offset?: number; limit?: number; head?: number } = {}): Promise<{ total: number; turns: TurnHeadJson[] }> {
+/** the one background rebuild a stale count may start; null when none is running */
+let refreshInBackground: Promise<void> | null = null;
+async function turnsJson(opts: { offset?: number; limit?: number; head?: number } = {}): Promise<{ total: number; turns: TurnHeadJson[]; /** the manifest was stale: a rebuild is running, ask again for the count */ refreshing?: boolean }> {
   // the count alone comes from the text manifest, at once (the line file is a hundred megabytes on a big
-  // index). A manifest from an earlier index version reads as empty, so an empty one brings the index up
-  // to date first: after a version bump the count would otherwise be 0 until the next search rebuilt it.
+  // index). A manifest from an earlier index version reads as empty; then the rebuild starts in the
+  // background and the answer says so, instead of holding the caller (and, on the desktop, every other
+  // bridge call on the main process) for the tens of seconds a big index takes (#57). The count is right
+  // once the rebuild has written the manifest; a caller that sees `refreshing` asks again later.
   if (opts.limit === 0) {
-    let text = await loadText();
-    if (!Object.keys(text.sessions).length) { await ensureFresh(); text = await loadText(); }
+    const text = await loadText();
+    if (!Object.keys(text.sessions).length) {
+      refreshInBackground ??= ensureFresh().then(() => undefined, () => undefined).finally(() => { refreshInBackground = null; });
+      return { total: 0, turns: [], refreshing: true };
+    }
     return { total: Object.values(text.sessions).reduce((a, b) => a + b, 0), turns: [] };
   }
   const facts = await ensureFresh();

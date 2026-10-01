@@ -51,9 +51,12 @@ export default function RecallChip({ nodeId }: { nodeId?: string } = {}) {
   const scaleLabel = (s: RecallScale) => t(s === 'lean' ? 'recall.scaleLean' : s === 'standard' ? 'recall.scaleStandard' : 'recall.scaleGenerous');
   const pickReach = async (r: RecallReach) => {
     if (r === 'full') {
-      const total = await Promise.resolve().then(() => whyBridge()?.turns({ limit: 0 })).then((x) => x?.total ?? 0).catch(() => 0);
-      // nothing to hand to the judge (an empty index, or one still being rebuilt): full has no meaning yet, and a
-      // dialog pricing 0 turns at $0.00 would only look broken
+      const counted = await Promise.resolve().then(() => whyBridge()?.turns({ limit: 0 })).then((x) => ({ total: x?.total ?? 0, refreshing: !!x?.refreshing })).catch(() => ({ total: 0, refreshing: false }));
+      // a stale index rebuilds in the background (#57): say so, no number to show yet
+      if (counted.refreshing) { toast('info', t('recall.reachFullRefreshing'), 6000); return; }
+      const total = counted.total;
+      // nothing to hand to the judge (an empty index): full has no meaning yet, and a dialog pricing 0 turns at
+      // $0.00 would only look broken
       if (!total) { toast('info', t('recall.reachFullEmpty'), 6000); return; }
       const est = reachEstimate(total);
       // the wait is named, not numbered: it is tens of seconds either way and the number only invited quibbles

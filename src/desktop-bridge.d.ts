@@ -173,7 +173,7 @@ interface DesktopWhyBridge {
   status(): Promise<{ available: boolean; home?: string; error?: string }>;
   find(phrase: string, opts?: { scope?: 'q' | 'a' | 'm' | 'all'; limit?: number; cwd?: string }): Promise<WhyFindResult>;
   /** every turn the index knows, newest first (limit 0 = the count alone) */
-  turns(opts?: { offset?: number; limit?: number; head?: number }): Promise<{ total: number; turns: WhyTurnHead[] }>;
+  turns(opts?: { offset?: number; limit?: number; head?: number }): Promise<{ total: number; turns: WhyTurnHead[]; /** a count asked of a stale index: the rebuild runs in the background, ask again later */ refreshing?: boolean }>;
   recall(session: string, turn: number): Promise<WhyRecalledTurn>;
   memories(): Promise<WhyMemoryFile[]>;
   /** near words from the indexed text for a mistyped term */
