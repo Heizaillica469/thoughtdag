@@ -1263,7 +1263,7 @@ export const en = {
   'chat.title': 'Ask the canvas',
   'chat.placeholder': 'Ask this canvas…',
   'chat.focusAll': 'The whole canvas',
-  'chat.focusAllHint': 'Select a node and the question focuses on it',
+  'chat.focusAllHint': 'click a node on the canvas and the question focuses on it',
   'recall.reachFullRefreshing': 'The index is refreshing; choose full once it is done.',
   'chat.focus': 'Focus',
   'chat.clear': 'Clear',

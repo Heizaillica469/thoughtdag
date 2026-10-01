@@ -1262,7 +1262,7 @@ export const zh: Record<keyof typeof en, string> = {
   'chat.title': '问画布',
   'chat.placeholder': '问这张画布……',
   'chat.focusAll': '整张画布',
-  'chat.focusAllHint': '选中一个节点，问题就聚焦到它',
+  'chat.focusAllHint': '在画布上点选一个节点，问题就聚焦到它',
   'recall.reachFullRefreshing': '索引正在刷新，刷新完再选全量。',
   'chat.focus': '关注',
   'chat.clear': '清空',

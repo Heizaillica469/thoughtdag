@@ -164,7 +164,7 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
         <div className="flex items-center gap-1.5 text-2xs text-ink-faint min-w-0" data-chat-focus>
           {focusNode
             ? <><span className="shrink-0">{t('chat.focus')}</span><button type="button" onClick={() => onLocate(focusNode.id)} className="text-accent truncate min-w-0 hover:underline">{nodeLabel(focusNode.data, lang).split('：')[0]}</button><button type="button" onClick={() => setFocusCleared(true)} className="shrink-0 w-5 h-5 rounded-full hover:bg-wash flex items-center justify-center" title={t('chat.focusAll')}><X size={11} /></button></>
-            : <span title={t('chat.focusAllHint')}>{t('chat.focusAll')}</span>}
+            : <span className="truncate min-w-0"><span className="text-ink-muted">{t('chat.focusAll')}</span> · {t('chat.focusAllHint')}</span>}
         </div>
         <div className="flex items-end gap-1.5">
           <textarea
