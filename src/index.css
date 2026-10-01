@@ -409,6 +409,28 @@ textarea:focus-visible {
   margin-bottom: 0.75em;
 }
 
+/* Ask-the-canvas citations: a number the reader clicks to locate the node;
+   a number the canvas does not have is red, so an invented one shows. */
+.cite-chip {
+  display: inline-flex; align-items: center; vertical-align: baseline;
+  margin: 0 1px; padding: 0 5px; border-radius: 5px; line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78em; font-weight: 600;
+  color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent); cursor: pointer;
+}
+.cite-chip:hover { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.cite-chip.unknown { color: #C73E2E; background: rgba(199, 62, 46, 0.08); border-color: rgba(199, 62, 46, 0.4); cursor: help; }
+/* inside the dialog the answer's explore marks ARE the chips (one markup for the dialog and the dropped node) */
+[data-canvas-chat] .markdown-body mark.explore-mark {
+  display: inline-flex; align-items: center; vertical-align: baseline; margin: 0 1px; padding: 0 5px; border-radius: 5px; line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78em; font-weight: 600; text-decoration: none;
+  color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent); cursor: pointer;
+}
+[data-canvas-chat] .markdown-body mark.explore-mark:hover { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+[data-canvas-chat] .markdown-body mark.explore-mark[data-explore-target=""] { color: #C73E2E; background: rgba(199, 62, 46, 0.08); border-color: rgba(199, 62, 46, 0.4); cursor: help; }
+[data-canvas-chat] .markdown-body p { margin-bottom: 0.5em; }
+
 /* A question set as markdown: the answer's rendering, tighter — the block
    is a title-weight line most of the time, a short list or a code sample
    sometimes; nothing in it should open up like an answer's paragraphs. */

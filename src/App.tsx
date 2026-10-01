@@ -30,6 +30,7 @@ import NodeContextMenu from './components/NodeContextMenu';
 import HighlightsOverviewModal from './components/ui/HighlightsOverviewModal';
 import MaterialsOverviewModal from './components/ui/MaterialsOverviewModal';
 import SearchBar from './components/SearchBar';
+import CanvasChat from './components/CanvasChat';
 import DiagnosticsPanel from './components/DiagnosticsPanel';
 import MaterialReader from './components/MaterialReader';
 import ProjectSwitcher from './components/ProjectSwitcher';
@@ -213,6 +214,7 @@ function Canvas() {
   const setWheelPans = useUiStore((s) => s.setWheelPans);
   const [inputValue, setInputValue] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [rootRole, setRootRole] = useState('');
   const [showRootRole, setShowRootRole] = useState(false);
   const [landingAtlas, setLandingAtlas] = useState(false);
@@ -1689,6 +1691,16 @@ function Canvas() {
         )}
         {hasNodes && (
           <button
+            onClick={() => setChatOpen((v) => !v)}
+            className={`bg-card/90 backdrop-blur border border-line rounded-lg w-8 h-8 flex items-center justify-center shadow-sm hover:bg-wash transition-colors ${chatOpen ? 'text-accent' : 'text-ink-faint hover:text-accent'}`}
+            title={t('chat.entryTitle')}
+            data-chat-entry
+          >
+            <MessageCircleQuestion size={15} strokeWidth={1.75} />
+          </button>
+        )}
+        {hasNodes && (
+          <button
             onClick={() => setSearchOpen(true)}
             className="bg-card/90 backdrop-blur border border-line rounded-lg w-8 h-8 flex items-center justify-center shadow-sm hover:bg-wash transition-colors text-ink-faint hover:text-accent"
             title={t('search.entryTitle')}
@@ -1947,6 +1959,18 @@ function Canvas() {
 
       {/* Multi-select toolbar */}
       {multiSelected && !isViewerMode && <SelectionToolbar />}
+
+      {/* Ask the canvas: the outline-reading dialog, bottom right */}
+      {!isViewerMode && (
+        <CanvasChat
+          open={chatOpen}
+          onClose={() => setChatOpen(false)}
+          onLocate={(id) => {
+            const n = useStore.getState().nodes.find((x) => x.id === id);
+            if (n) { setSelectedNodeId(id); centerNode(n, { zoom: 1 }); }
+          }}
+        />
+      )}
 
       {/* Cmd+F node search */}
       <SearchBar
