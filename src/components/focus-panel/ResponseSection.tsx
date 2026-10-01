@@ -55,7 +55,9 @@ export default function ResponseSection({
     if (window.getSelection()?.toString()) return; // a drag-select, not a click
     e.stopPropagation();
     const childId = m.getAttribute('data-explore-target');
-    if (!childId) return;
+    // the same guard the card's click has: a mark whose node is gone (deleted, or written by the model) does
+    // nothing, instead of selecting an id the panel cannot show (#56)
+    if (!childId || !useStore.getState().nodes.some((n) => n.id === childId)) return;
     setSelectedNodeId(childId);
     onFocusNode?.(childId);
   };
