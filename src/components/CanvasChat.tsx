@@ -38,8 +38,8 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
   const list = useRef<HTMLDivElement>(null);
   useEffect(() => { setTurns(loadTurns(projectId)); }, [projectId]);
   useEffect(() => { if (open) list.current?.scrollTo({ top: list.current.scrollHeight }); }, [open, turns.length, busy]);
-  // a halo left on by a hover must not outlive the dialog
-  useEffect(() => { if (!open) useUiStore.getState().setCondenseHighlightIds([]); }, [open]);
+  // a beacon left on by a hover must not outlive the dialog
+  useEffect(() => { if (!open) useUiStore.getState().setBeaconNodeId(null); }, [open]);
   // the selection is the focus unless the person set it aside for this question
   useEffect(() => { setFocusCleared(false); }, [selectedNodeId]);
   const focusId = !focusCleared && selectedNodeId && nodes.some((n) => n.id === selectedNodeId && !n.data.archived) ? selectedNodeId : null;
@@ -97,16 +97,18 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
   const questionOf = (i: number): string => { for (let k = i - 1; k >= 0; k--) if (turns[k].role === 'user') return turns[k].text; return ''; };
   const chip = (id: string, alias: string, key: string) => {
     const n = nodes.find((x) => x.id === id);
-    return <button key={key} type="button" className="cite-chip" title={n ? nodeLabel(n.data, lang) : alias} onClick={() => onLocate(id)} onMouseEnter={() => useUiStore.getState().setCondenseHighlightIds([id])} onMouseLeave={() => useUiStore.getState().setCondenseHighlightIds([])} data-cite={id}>{alias}</button>;
+    return <button key={key} type="button" className="cite-chip" title={n ? nodeLabel(n.data, lang) : alias} onClick={() => onLocate(id)} onMouseEnter={() => beacon(id)} onMouseLeave={() => beacon(null)} data-cite={id}>{alias}</button>;
   };
   // the answer is markdown with its citations as explore marks: one click handler locates the node a mark names,
-  // and hovering a mark lights that node on the canvas (the same halo the condense dialog uses), so the reader
-  // sees where a claim rests without leaving the dialog
+  // and hovering a mark lights that node on the canvas with the beacon the "continue last thought" button uses
+  // (a ripple that shows on cards, plaques and glyphs alike), so the reader sees where a claim rests
   const markId = (e: ReactMouseEvent): string | null => (e.target as HTMLElement).closest?.('mark[data-explore-target]')?.getAttribute('data-explore-target') || null;
   const onAnswerClick = (e: ReactMouseEvent) => { const id = markId(e); if (id) { e.stopPropagation(); onLocate(id); } };
-  const light = (ids: string[]) => useUiStore.getState().setCondenseHighlightIds(ids);
-  const onAnswerOver = (e: ReactMouseEvent) => { const id = markId(e); light(id ? [id] : []); };
-  const onAnswerOut = () => light([]);
+  const beacon = (id: string | null) => useUiStore.getState().setBeaconNodeId(id);
+  const onAnswerOver = (e: ReactMouseEvent) => beacon(markId(e));
+  const onAnswerOut = () => beacon(null);
+  const suggest = (q: string) => { setDraft(q); window.setTimeout(() => { const ta = document.querySelector<HTMLTextAreaElement>('[data-chat-input]'); ta?.focus(); ta?.setSelectionRange(q.length, q.length); }, 0); };
+  const SUGGESTIONS: { k: 'Overview' | 'Locate' | 'Grounds' | 'Compare' | 'Progress' }[] = [{ k: 'Overview' }, { k: 'Locate' }, { k: 'Grounds' }, { k: 'Compare' }, { k: 'Progress' }];
   return (
     <div className="fixed bottom-4 right-4 z-[85] w-[440px] max-w-[calc(100vw-32px)] max-h-[72vh] flex flex-col rounded-2xl border border-line bg-card shadow-2xl" data-canvas-chat>
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-line shrink-0">
@@ -140,6 +142,13 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
         {busy && <div className="flex items-center gap-1.5 text-xs text-ink-faint"><Loader2 size={12} className="animate-spin" /> {t('chat.thinking')}</div>}
       </div>
       <div className="border-t border-line px-3 py-2 shrink-0 space-y-1.5">
+        {/* the five things people ask a canvas, one tap each: overview, locate, grounds, compare, progress */}
+        <div className="flex items-center gap-1 flex-wrap text-2xs" data-chat-suggestions>
+          <span className="text-ink-faint mr-0.5">{t('chat.sug')}</span>
+          {SUGGESTIONS.map(({ k }) => (
+            <button key={k} type="button" onClick={() => suggest(t(`chat.sug${k}Q`))} title={t(`chat.sug${k}Q`)} className="px-2 py-0.5 rounded-full bg-wash text-ink-muted hover:text-accent hover:bg-accent/10 transition-colors" data-chat-suggest={k.toLowerCase()}>{t(`chat.sug${k}`)}</button>
+          ))}
+        </div>
         <div className="flex items-center gap-1.5 text-2xs text-ink-faint min-w-0" data-chat-focus>
           {focusNode
             ? <><span className="shrink-0">{t('chat.focus')}</span><button type="button" onClick={() => onLocate(focusNode.id)} className="text-accent truncate min-w-0 hover:underline">{nodeLabel(focusNode.data, lang).split('：')[0]}</button><button type="button" onClick={() => setFocusCleared(true)} className="shrink-0 w-5 h-5 rounded-full hover:bg-wash flex items-center justify-center" title={t('chat.focusAll')}><X size={11} /></button></>
