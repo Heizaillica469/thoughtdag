@@ -74,9 +74,18 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
     if (turn.focus && st.nodes.some((n) => n.id === turn.focus)) {
       newEdges.push({ id: `edge-${turn.focus}-${node.id}`, source: turn.focus, target: node.id, type: 'smoothstep', sourceHandle: 'continue', targetHandle: 'top', style: { stroke: COLORS.accent, strokeWidth: 2 }, markerEnd: { type: 'arrowclosed', color: COLORS.accent, width: 18, height: 18 } as ThoughtEdge['markerEnd'], data: {} });
     }
+    // the citations as quote-depth references, the shape addCrossLink draws, wired in one go: that action's
+    // per-edge price toast would stack fifteen times here, and the summary toast below says it once
+    const now = new Date().toISOString();
+    for (const id of cited) {
+      if (id === turn.focus) continue;
+      const src = st.nodes.find((n) => n.id === id)!;
+      const vertical = position.y > src.position.y + 60 && Math.abs(position.x - src.position.x) < 320;
+      newEdges.push({ id: `crosslink-${id}-${node.id}`, source: id, sourceHandle: vertical ? 'continue' : 'branch', target: node.id, targetHandle: vertical ? 'top' : 'left', type: 'smoothstep', style: { stroke: COLORS.accent, strokeDasharray: '8 4', strokeWidth: 2 }, animated: true, data: { isCrossLink: true, createdAt: now } });
+    }
     st.setNodes([...st.nodes, node]);
-    if (newEdges.length) st.setEdges([...useStore.getState().edges, ...newEdges]);
-    for (const id of cited) if (id !== turn.focus) useStore.getState().addCrossLink(id, node.id);
+    st.setEdges([...useStore.getState().edges, ...newEdges]);
+    for (const e of newEdges) useStore.getState().logEvent('connect', e.id);
     useStore.getState().logEvent('ask', node.id, { chars: question.length });
     toast('success', fmt(t('chat.dropped'), { n: cited.length }), 6000);
     onLocate(node.id);
