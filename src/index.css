@@ -412,14 +412,14 @@ textarea:focus-visible {
 /* A question set as markdown: the answer's rendering, tighter — the block
    is a title-weight line most of the time, a short list or a code sample
    sometimes; nothing in it should open up like an answer's paragraphs. */
-.question-md .markdown-body { line-height: 1.55; }
-.question-md .markdown-body p { margin-bottom: 0.35em; }
-.question-md .markdown-body ul, .question-md .markdown-body ol { margin-bottom: 0.35em; }
-.question-md .markdown-body li { margin-bottom: 0.1em; }
-.question-md .markdown-body h1, .question-md .markdown-body h2, .question-md .markdown-body h3 { margin-top: 0.4em; margin-bottom: 0.25em; font-size: 1.05em; }
-.question-md .markdown-body pre { margin: 0.35em 0; font-weight: 400; }
-.question-md .markdown-body > :first-child { margin-top: 0; }
-.question-md .markdown-body > :last-child { margin-bottom: 0; }
+.question-md.markdown-body { line-height: 1.55; }
+.question-md.markdown-body p { margin-bottom: 0.35em; }
+.question-md.markdown-body ul, .question-md.markdown-body ol { margin-bottom: 0.35em; }
+.question-md.markdown-body li { margin-bottom: 0.1em; }
+.question-md.markdown-body h1, .question-md.markdown-body h2, .question-md.markdown-body h3 { margin-top: 0.4em; margin-bottom: 0.25em; font-size: 1.05em; }
+.question-md.markdown-body pre { margin: 0.35em 0; font-weight: 400; }
+.question-md.markdown-body > :first-child { margin-top: 0; }
+.question-md.markdown-body > :last-child { margin-bottom: 0; }
 
 .markdown-body p:last-child {
   margin-bottom: 0;
