@@ -39,6 +39,38 @@ const DOCS = 'https://chenxiachan.github.io/thoughtdag/docs';
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    version: '0.5.12',
+    date: '2026-10-01',
+    announce: true,
+    lead: {
+      zh: '💬 新增「问画布」：让模型读整张画布，回答里的每个编号都能点回节点。',
+      en: '💬 New: Ask the canvas. The model reads the whole canvas, and every number in its answer points back at a node.',
+    },
+    items: [
+      {
+        title: { zh: '💬 问画布', en: '💬 Ask the canvas' },
+        body: {
+          zh: '工具栏 ⌘F 旁的问号气泡。它读画布的大纲（每个节点一行：编号、主题、结论、上游），选中节点时再读它的脉络和材料。回答用编号引用：悬停点亮节点，点击定位，画布上没有的编号标红。「落到画布」把这轮问答变成节点，引用线连到它提到的每个节点。空白时给了五个起手问题：总览、定位、溯源、比对、进展。只看画布，不联网，不进上下文。',
+          en: 'The question bubble next to ⌘F on the toolbar. It reads an outline of the canvas (one line a node: number, topic, takeaway, upstream) and, with a node selected, that node\'s chain and materials. Answers cite by number: hover lights the node, click locates it, a number the canvas lacks shows red. "Drop onto the canvas" turns the exchange into a node wired by reference to every node it cited. Five opening questions wait in the empty state: overview, locate, grounds, compare, progress. It reads only the canvas: no web, nothing enters your context.',
+        },
+      },
+      {
+        title: { zh: '。 标点不再孤立', en: '。 Punctuation stays with its word' },
+        body: {
+          zh: '缩小后牌子上的句号、逗号不再掉到下一行开头。',
+          en: 'On zoomed-out plaques a full stop or comma no longer opens a line by itself.',
+        },
+      },
+      {
+        title: { zh: '🔧 两处修复', en: '🔧 Two fixes' },
+        body: {
+          zh: '侧栏里点到已不存在的探索标记，面板不再空白（#56）。索引升级后第一次选「全量」回忆，不再卡住整个应用：索引在后台刷新，菜单里提示一句（#57）。',
+          en: 'Clicking a stale explore mark in the panel no longer blanks it (#56). The first "full" recall after an index upgrade no longer stalls the app: the index refreshes in the background and the menu says so (#57).',
+        },
+      },
+    ],
+  },
+  {
     // a quiet release: the 0.5.2 entry stays the announcement, this one is history only
     version: '0.5.11',
     date: '2026-10-01',
