@@ -56,7 +56,7 @@ npx thoughtdag topics                       # 查看本地索引中的主题
 
 在 Harness 内切换对话与思维图：用画布选择上下文，再由 Harness 执行下一轮。
 
-桌面版 Harness：打开「插件」，点「添加插件」，输入 `dsh-thoughtdag` 即可。网页版用命令行：
+桌面版 Harness（0.2.0-rc.2 起）：打开「插件」页，搜索 `dsh-thoughtdag` 安装，装完重启 Harness。刚发布的版本要写明版本号 `dsh-thoughtdag@<版本号>`（pnpm 默认压住发布不满 24 小时的版本）。网页版用命令行：
 
 ```bash
 dsh plugin --profile web add dsh-thoughtdag

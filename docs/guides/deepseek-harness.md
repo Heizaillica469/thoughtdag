@@ -10,16 +10,20 @@ The plugin embeds the ThoughtDAG canvas in the Harness web UI. Compose the next 
 
 Prerequisites: a configured DeepSeek Harness installation, **0.1.2-rc.1 or later**, with Node.js **22.19+ (22.x) or 24+**.
 
-In the DeepSeek Harness desktop app, open **Plugins**, choose **Add plugin**, and enter `dsh-thoughtdag`. For the web profile, from the command line:
+**Desktop Harness** (0.2.0-rc.2 or later): open the **Plugins** page, search the list for `dsh-thoughtdag`, and install it. Then **restart Harness once**; plugins load at launch. A **Chat | Thought graph** switch then sits above the chat, and the thought graph is the canvas; on the desktop the same switch also lives in the title row.
+
+**Web profile**, from the command line:
 
 ```bash
 dsh plugin --profile web add dsh-thoughtdag
 dsh web
 ```
 
-pnpm 11 holds back versions published within the last 24 hours by default; to install a release the day it ships, name the version: `dsh plugin --profile web add dsh-thoughtdag@<version>`. Every release also carries the plugin as `dsh-thoughtdag-<version>.tgz` in its Assets on GitHub; `dsh plugin` runs pnpm, so the same command takes that file's URL or a local path. To update an existing install, run `dsh plugin --profile web add dsh-thoughtdag@latest` (the in-app update hint copies this command).
+Open the address printed by `dsh web`. Above the chat, switch to the thought-graph view; select the chat view to return.
 
-Open the address printed by `dsh web`. Above the chat, switch to the thought-graph view (**思维图**); select the chat view (**对话**) to return.
+**A fresh release needs its version named.** `dsh plugin` runs pnpm, and pnpm holds back versions published within the last 24 hours, on the desktop as on the web: the plugin list shows the new version number, but an install without a version lands on the previous day's. To install a release the day it ships, write the version: on the desktop enter `dsh-thoughtdag@<version>` where you add the plugin; on the web run `dsh plugin --profile web add dsh-thoughtdag@<version>` (the desktop's profile is named `desktop`, so the same command with `--profile desktop` installs into the desktop app from the command line). Every release also carries the plugin as `dsh-thoughtdag-<version>.tgz` in its Assets on GitHub; the same command takes that file's URL or a local path.
+
+**Updating**: on the desktop, add `dsh-thoughtdag@<version>` again from the Plugins page and restart Harness; on the web, `dsh plugin --profile web add dsh-thoughtdag@latest`. When the canvas shows an update notice, the notice carries this step.
 
 The plugin includes the canvas. **No separate ThoughtDAG desktop app, CLI, or MCP installation is required.** Models and tools use your Harness configuration.
 
@@ -83,7 +87,8 @@ The plugin enables native tools and a check-history-before-editing prompt by def
 
 | Symptom | Check first |
 |---|---|
-| No thought-graph switch | Install with `--profile web`, restart `dsh web`, and refresh; check the Harness version and startup logs |
+| No thought-graph switch | Desktop: restart Harness after installing, and check that Harness is 0.2.0-rc.2 or later. Web: install with `--profile web`, restart `dsh web`, and refresh; check the Harness version and startup logs |
+| The plugin list shows a new version, but an older one gets installed | pnpm's 24-hour hold; see Install above and name the version |
 | A model is missing | Check its model configuration and credentials in Harness |
 | An answer appears on the canvas but not in the Harness log | Check whether you selected a regular model; use Agent mode for tool execution and a recorded turn |
 | Atlas cannot find another tool's sessions | Check that the logs are on the Harness host and use a supported format |
