@@ -118,7 +118,17 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
         <button type="button" onClick={onClose} className="text-ink-faint hover:text-ink w-7 h-7 rounded-full flex items-center justify-center hover:bg-wash" title={t('common.close')}><X size={15} strokeWidth={1.75} /></button>
       </div>
       <div ref={list} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 text-sm" data-chat-turns>
-        {!turns.length && <p className="text-xs text-ink-faint leading-relaxed">{t('chat.empty')}</p>}
+        {!turns.length && (
+          <div className="text-xs text-ink-muted leading-relaxed space-y-2" data-chat-empty>
+            <p>{t('chat.empty')}</p>
+            <div className="flex items-center gap-1 flex-wrap text-2xs">
+              <span className="text-ink-faint mr-0.5">{t('chat.sug')}</span>
+              {SUGGESTIONS.map(({ k }) => (
+                <button key={k} type="button" onClick={() => suggest(t(`chat.sug${k}Q`))} title={t(`chat.sug${k}Q`)} className="px-2 py-0.5 rounded-full bg-wash text-ink-muted hover:text-accent hover:bg-accent/10 transition-colors" data-chat-suggest={k.toLowerCase()}>{t(`chat.sug${k}`)}</button>
+              ))}
+            </div>
+          </div>
+        )}
         {turns.map((turn, i) => turn.role === 'user' ? (
           <div key={turn.id} className="flex flex-col items-end gap-1" data-chat-turn="user">
             <div className="max-w-[88%] bg-accent/10 text-ink rounded-2xl rounded-br-md px-3 py-2 whitespace-pre-wrap break-words">{turn.text}</div>
@@ -142,12 +152,15 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
         {busy && <div className="flex items-center gap-1.5 text-xs text-ink-faint"><Loader2 size={12} className="animate-spin" /> {t('chat.thinking')}</div>}
       </div>
       <div className="border-t border-line px-3 py-2 shrink-0 space-y-1.5">
-        {/* the five things people ask a canvas, one tap each: overview, locate, grounds, compare, progress */}
-        <div className="flex items-center gap-1 flex-wrap text-2xs" data-chat-suggestions>
-          {SUGGESTIONS.map(({ k }) => (
-            <button key={k} type="button" onClick={() => suggest(t(`chat.sug${k}Q`))} title={t(`chat.sug${k}Q`)} className="px-2 py-0.5 rounded-full bg-wash text-ink-muted hover:text-accent hover:bg-accent/10 transition-colors" data-chat-suggest={k.toLowerCase()}>{t(`chat.sug${k}`)}</button>
-          ))}
-        </div>
+        {/* the five things people ask a canvas (overview, locate, grounds, compare, progress): in the empty
+            state they sit under the one-line intro; once a conversation is on, a quiet row above the input */}
+        {turns.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap text-2xs" data-chat-suggestions>
+            {SUGGESTIONS.map(({ k }) => (
+              <button key={k} type="button" onClick={() => suggest(t(`chat.sug${k}Q`))} title={t(`chat.sug${k}Q`)} className="px-2 py-0.5 rounded-full bg-wash text-ink-muted hover:text-accent hover:bg-accent/10 transition-colors" data-chat-suggest={k.toLowerCase()}>{t(`chat.sug${k}`)}</button>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-1.5 text-2xs text-ink-faint min-w-0" data-chat-focus>
           {focusNode
             ? <><span className="shrink-0">{t('chat.focus')}</span><button type="button" onClick={() => onLocate(focusNode.id)} className="text-accent truncate min-w-0 hover:underline">{nodeLabel(focusNode.data, lang).split('：')[0]}</button><button type="button" onClick={() => setFocusCleared(true)} className="shrink-0 w-5 h-5 rounded-full hover:bg-wash flex items-center justify-center" title={t('chat.focusAll')}><X size={11} /></button></>
