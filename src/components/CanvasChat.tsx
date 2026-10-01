@@ -144,7 +144,6 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
       <div className="border-t border-line px-3 py-2 shrink-0 space-y-1.5">
         {/* the five things people ask a canvas, one tap each: overview, locate, grounds, compare, progress */}
         <div className="flex items-center gap-1 flex-wrap text-2xs" data-chat-suggestions>
-          <span className="text-ink-faint mr-0.5">{t('chat.sug')}</span>
           {SUGGESTIONS.map(({ k }) => (
             <button key={k} type="button" onClick={() => suggest(t(`chat.sug${k}Q`))} title={t(`chat.sug${k}Q`)} className="px-2 py-0.5 rounded-full bg-wash text-ink-muted hover:text-accent hover:bg-accent/10 transition-colors" data-chat-suggest={k.toLowerCase()}>{t(`chat.sug${k}`)}</button>
           ))}
@@ -152,7 +151,7 @@ export default function CanvasChat({ open, onClose, onLocate }: { open: boolean;
         <div className="flex items-center gap-1.5 text-2xs text-ink-faint min-w-0" data-chat-focus>
           {focusNode
             ? <><span className="shrink-0">{t('chat.focus')}</span><button type="button" onClick={() => onLocate(focusNode.id)} className="text-accent truncate min-w-0 hover:underline">{nodeLabel(focusNode.data, lang).split('：')[0]}</button><button type="button" onClick={() => setFocusCleared(true)} className="shrink-0 w-5 h-5 rounded-full hover:bg-wash flex items-center justify-center" title={t('chat.focusAll')}><X size={11} /></button></>
-            : <span>{t('chat.focusAll')}</span>}
+            : <span title={t('chat.focusAllHint')}>{t('chat.focusAll')}</span>}
         </div>
         <div className="flex items-end gap-1.5">
           <textarea
