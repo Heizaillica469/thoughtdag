@@ -56,7 +56,8 @@ export default function RecallChip({ nodeId }: { nodeId?: string } = {}) {
       // dialog pricing 0 turns at $0.00 would only look broken
       if (!total) { toast('info', t('recall.reachFullEmpty'), 6000); return; }
       const est = reachEstimate(total);
-      const ok = await confirmDialog({ title: t('recall.reachFullTitle'), message: fmt(t('recall.reachFullMsg'), { n: total.toLocaleString(), s: String(Math.round(est.seconds)), c: est.dollars.toFixed(2) }), confirmLabel: t('recall.reachFullOk') });
+      // the wait is named, not numbered: it is tens of seconds either way and the number only invited quibbles
+      const ok = await confirmDialog({ title: t('recall.reachFullTitle'), message: fmt(t('recall.reachFullMsg'), { n: total.toLocaleString(), c: est.dollars.toFixed(2) }), confirmLabel: t('recall.reachFullOk') });
       if (!ok) return;
     }
     apply({ reach: r });

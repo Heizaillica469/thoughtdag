@@ -1,68 +1,54 @@
-import { useState } from 'react';
 import { Paperclip, UserCog } from 'lucide-react';
-import { useStore } from '../../store';
-import { isImeComposing } from '../../utils';
 import { useT } from '../../i18n';
 import { isViewerMode } from '../../lib/viewer';
-import RoleTemplateChips from '../ui/RoleTemplateChips';
 import type { ThoughtData } from '../../types';
 
 // The panel's summary kicker: role · tokens · materials, in one quiet line
 // at the top. The narrow role model: a rolePrompt on a node is the system
 // prompt for it and everything downstream (nearest ancestor wins). Clicking
-// the role text opens the editor on ANY node: on the node that set it, the
-// text is its own; elsewhere the inherited text comes prefilled and saving
-// gives this node a role of its own (the "inherited" tag goes). Machine-step
+// the role text asks the panel to open the editor (RoleEditor, a full-width
+// strip under the header) on ANY node: on the node that set it, the text is
+// its own; elsewhere the inherited text comes prefilled and saving gives
+// this node a role of its own (the "inherited" tag goes). Machine-step
 // personas don't use this at all; they live in prompt text.
 
 export default function RoleLine({
-  nodeId,
   data,
   inheritedRole,
+  onEdit,
 }: {
-  nodeId: string;
   data: ThoughtData;
   inheritedRole: string;
+  /** open the editor with this text */
+  onEdit: (initial: string) => void;
 }) {
-  const setRolePrompt = useStore((s) => s.setRolePrompt);
   const t = useT();
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(data.rolePrompt ?? '');
-
   const own = data.rolePrompt;
   const effective = own || inheritedRole;
-  // any node may set its own role (a system prompt for it and everything
-  // downstream, nearest ancestor wins): an inherited one opens prefilled, so
-  // a follow-up can refine the root's role instead of only reading it
-  const canEdit = true;
   const attachCount = (data.attachments || []).length;
-
-  const save = () => {
-    setRolePrompt(nodeId, value.trim());
-    setEditing(false);
-  };
 
   return (
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-1.5 text-xs text-ink-faint min-w-0 h-8">
         <UserCog size={13} strokeWidth={1.75} className="shrink-0" />
-        {!editing && (<>
         {effective ? (
-          canEdit ? (
+          isViewerMode ? (
+            <span className="text-warm/90 truncate max-w-[45%] shrink-0" title={effective}>{effective}</span>
+          ) : (
             <button
-              onClick={() => { if (isViewerMode) return; setValue(own ?? effective); setEditing(true); }}
+              onClick={() => onEdit(own ?? effective)}
               className="text-warm hover:underline decoration-dotted underline-offset-2 truncate font-medium max-w-[45%] shrink-0"
               title={`${effective} — ${t('role.edit')}`}
+              data-role-line-edit
             >
               {effective}
             </button>
-          ) : (
-            <span className="text-warm/90 truncate max-w-[45%] shrink-0" title={effective}>{effective}</span>
           )
-        ) : canEdit && !isViewerMode ? (
+        ) : !isViewerMode ? (
           <button
-            onClick={() => { setValue(''); setEditing(true); }}
+            onClick={() => onEdit('')}
             className="hover:text-warm transition-colors shrink-0"
+            data-role-line-set
           >
             + {t('role.set')}
           </button>
@@ -73,7 +59,6 @@ export default function RoleLine({
           <span className="text-2xs bg-line/50 px-1.5 py-px rounded-full shrink-0">{t('role.inherited')}</span>
         )}
         <span className="shrink-0">·</span>
-        </>)}
         <span className="shrink-0 text-ink-muted">{data.tokenCount} tok</span>
         {attachCount > 0 && (
           <>
@@ -84,27 +69,6 @@ export default function RoleLine({
           </>
         )}
       </div>
-      {editing && (
-        <div className="pb-2 space-y-1.5">
-          <textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey && !isImeComposing(e)) { e.preventDefault(); save(); }
-              if (e.key === 'Escape') setEditing(false);
-            }}
-            placeholder={t('role.placeholder')}
-            className="w-full text-xs border border-line rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-accent bg-card text-ink resize-none leading-relaxed"
-            rows={2}
-            autoFocus
-          />
-          <RoleTemplateChips onPick={(p) => setValue(p)} />
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setEditing(false)} className="text-xs text-ink-muted hover:text-ink px-2.5 py-1 rounded-lg hover:bg-line/40 transition-colors">{t('common.cancel')}</button>
-            <button onClick={save} className="text-xs bg-accent hover:bg-accent-strong text-white px-3 py-1 rounded-lg transition-colors">{t('common.save')}</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

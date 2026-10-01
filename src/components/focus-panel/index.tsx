@@ -9,6 +9,7 @@ import { awaitingInput } from '../../utils';
 import { useT } from '../../i18n';
 import { isViewerMode } from '../../lib/viewer';
 import RoleLine from './RoleLine';
+import RoleEditor from './RoleEditor';
 import AgentSessionLine from './AgentSessionLine';
 import AttachmentsSection from './AttachmentsSection';
 import RecallSection from './RecallSection';
@@ -66,9 +67,12 @@ export default function FocusPanel({ onFocusNode }: { onFocusNode?: (id: string)
 
   // Reset staged context when switching nodes (adjust-during-render).
   const [prevNodeId, setPrevNodeId] = useState(selectedNodeId);
+  // the role editor's text while it is open (null = closed); it closes with the node
+  const [roleEdit, setRoleEdit] = useState<string | null>(null);
   if (prevNodeId !== selectedNodeId) {
     setPrevNodeId(selectedNodeId);
     setBranchContext('');
+    setRoleEdit(null);
   }
 
   const node = nodes.find((n) => n.id === selectedNodeId);
@@ -118,7 +122,7 @@ export default function FocusPanel({ onFocusNode }: { onFocusNode?: (id: string)
       </div>
       {/* Header: summary kicker (role · tokens · materials) + action strip */}
       <div className="flex items-start gap-2 pl-4 pr-3 py-1.5 border-b border-line/70 shrink-0">
-        <RoleLine nodeId={selectedNodeId!} data={data} inheritedRole={inheritedRole} />
+        <RoleLine data={data} inheritedRole={inheritedRole} onEdit={(initial) => setRoleEdit(initial)} />
         <div className="flex items-center gap-1 shrink-0">
           {!isViewerMode && <HeaderActions nodeId={selectedNodeId!} isLoading={data.isLoading} />}
           <button
@@ -130,6 +134,10 @@ export default function FocusPanel({ onFocusNode }: { onFocusNode?: (id: string)
           </button>
         </div>
       </div>
+      {/* the role editor: a full-width strip under the header, the whole panel's width for the text and the presets */}
+      {roleEdit !== null && !isViewerMode && (
+        <RoleEditor nodeId={selectedNodeId!} initial={roleEdit} inherited={!data.rolePrompt && !!inheritedRole} hasOwn={!!data.rolePrompt} onClose={() => setRoleEdit(null)} />
+      )}
 
       {/* Scrollable content: one card per section */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5">
